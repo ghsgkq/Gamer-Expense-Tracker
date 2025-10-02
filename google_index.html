@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>게이머 가계부 (통합 버전, Beta)</title>
+    
+    <title>게이머 가계부 (Google Play 결제 내역 분석기)</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>🎮 게이머 가계부 (통합 버전, Beta)</h1>
-        <!-- <a href="apple_index.html" class="nav-link">🍎 Apple Store 게이머 가계부로 이동</a> -->
+        <h1>🎮 Google Play 게이머 가계부</h1>
+        <a href="apple_index.html" class="nav-link">🍎 Apple Store 게이머 가계부로 이동</a>
         <p>
-            Google Play에서 다운로드한 'Order History.json' 파일 또는 Apple Store에서 다운로드한 'html' 파일을 업로드하세요.
-            (파일 다운로드 가이드 보기 <a href="guide.html" target="_blank">구글</a>/<a href="apple_guide.html" target="_blank">애플</a>)
+            Google Play에서 다운로드한 'Order History.json' 파일을 업로드하세요. 
+            (<a href="guide.html" target="_blank">파일 다운로드 가이드 보기</a>)
         </p>
-
-        <input type="file" id="fileInput" accept=".json, .html, .htm">
-        <p id="uploadStatus"></p>
+        
+        <input type="file" id="jsonFile" accept=".json">
 
         <!-- 전체 요약 섹션 -->
         <div id="overall-summary-section" class="hidden">
@@ -78,7 +78,7 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="./js/keyword.js"></script>
-    <script src="./js/app.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
 
