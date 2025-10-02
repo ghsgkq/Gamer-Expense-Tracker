@@ -63,6 +63,7 @@ function getAppName(title, publisher) {
         '붕괴3rd': ['붕괴3rd', '붕괴 3rd', '붕괴3', '붕괴 3'],
         '젠레스 존 제로': ['젠레스 존 제로', '젠레스존제로', 'Zenless Zone Zero', 'ZenlessZoneZero'],
         '리버스: 1999': ['리버스 1999', '리버스1999', 'REVERSE 1999', '리버스: 1999', '리버스:1999', 'REVERSE: 1999', 'REVERSE:1999'],
+        '에버소울': ['에버소울', 'Eversoul'],
     };
 
     if (publisher) {
