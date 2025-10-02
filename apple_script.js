@@ -3,24 +3,25 @@ let processedDataByGame = {};
 let currentGameData = [];
 let overallChartInstance = null;
 
-// JSON 파일 입력 이벤트 리스너
-document.getElementById('jsonFile').addEventListener('change', function(event) {
+// HTML 파일 입력 이벤트 리스너
+document.getElementById('htmlFile').addEventListener('change', function(event) {
     const file = event.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            const orders = JSON.parse(e.target.result);
-            processData(orders);
+            const htmlContent = e.target.result;
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlContent, "text/html");
+            processHtmlData(doc);
         } catch (error) {
-            alert('잘못된 JSON 파일입니다.');
-            console.error("JSON 파싱 오류:", error);
+            alert('잘못된 HTML 파일입니다.');
+            console.error("HTML 파싱 오류:", error);
         }
     };
     reader.readAsText(file, 'UTF-8');
 });
-
 
 // 가격 문자열에서 숫자만 추출
 function cleanPrice(priceStr) {
@@ -28,8 +29,17 @@ function cleanPrice(priceStr) {
     return parseInt(priceStr.replace(/[^0-9]/g, ''), 10) || 0;
 }
 
-// 상품명에서 앱/게임 이름 추출 (키워드 기반)
-function getAppName(title) {
+// 'YYYY년 MM월 DD일' 형식의 날짜 문자열을 Date 객체로 변환
+function parseKoreanDate(dateStr) {
+    const parts = dateStr.match(/(\d{4})년 (\d{1,2})월 (\d{1,2})일/);
+    if (!parts) return null;
+    // new Date(year, monthIndex, day)
+    return new Date(parts[1], parts[2] - 1, parts[3]);
+}
+
+// 상품명에서 앱/게임 이름 추출
+function getAppName(title, publisher) {
+    // 앱 이름과 관련 키워드 매핑
     const appKeywords = {
         '트릭컬 리바이브': ['트릭컬 리바이브', '트릭컬'],
         '명조:워더링 웨이브': ['명조:워더링 웨이브', '명조', 'Wuthering Waves'],
@@ -54,6 +64,17 @@ function getAppName(title) {
         '젠레스 존 제로': ['젠레스 존 제로', '젠레스존제로', 'Zenless Zone Zero', 'ZenlessZoneZero']
     };
 
+    if (publisher) {
+        for (const appName in appKeywords) {
+            for (const keyword of appKeywords[appName]) {
+                if (publisher.includes(keyword)) {
+                    return appName;
+                }
+            }
+        }
+    }
+    
+    // 퍼블리셔로 못찾으면 타이틀로 다시 검색
     if (title) {
         for (const appName in appKeywords) {
             for (const keyword of appKeywords[appName]) {
@@ -63,30 +84,51 @@ function getAppName(title) {
             }
         }
     }
+    
+    // 키워드 목록에 없으면 '기타'로 분류
     return '기타';
 }
 
-// JSON 데이터 처리
-function processData(orders) {
+
+// HTML 데이터 처리
+function processHtmlData(doc) {
     processedDataByGame = {};
-    orders.forEach(item => {
-        const order = item.orderHistory;
-        if (!order || !order.lineItem || order.lineItem.length === 0) return;
+    const purchaseElements = doc.querySelectorAll('.purchase');
 
-        const title = order.lineItem[0].doc.title || "";
-        const price = cleanPrice(order.totalPrice);
-        const refund = cleanPrice(order.refundAmount);
-        const netPrice = price - refund;
-        
-        if (netPrice > 0) {
-            const date = new Date(order.creationTime);
-            const appName = getAppName(title);
+    purchaseElements.forEach(purchase => {
+        const dateEl = purchase.querySelector('.invoice-date');
+        if (!dateEl) return;
 
-            if (!processedDataByGame[appName]) {
-                processedDataByGame[appName] = [];
+        const date = parseKoreanDate(dateEl.textContent.trim());
+        if (!date) return;
+
+        const itemElements = purchase.querySelectorAll('li.pli');
+
+        itemElements.forEach(item => {
+            const titleEl = item.querySelector('.pli-title div');
+            const priceEl = item.querySelector('.pli-price');
+            const publisherEl = item.querySelector('.pli-publisher');
+
+            if (titleEl && priceEl) {
+                const title = titleEl.getAttribute('aria-label').trim();
+                let priceText = priceEl.textContent.trim();
+                
+                // "무료" 항목은 건너뜀
+                if (priceText === '무료') return;
+
+                const price = cleanPrice(priceText);
+                const publisher = publisherEl ? publisherEl.textContent.trim() : "";
+                
+                const appName = getAppName(title, publisher);
+                
+                if (appName && price > 0) {
+                    if (!processedDataByGame[appName]) {
+                        processedDataByGame[appName] = [];
+                    }
+                    processedDataByGame[appName].push({ date, title, price });
+                }
             }
-            processedDataByGame[appName].push({ date, title, price: netPrice });
-        }
+        });
     });
 
     for (const game in processedDataByGame) {
@@ -109,6 +151,7 @@ function processData(orders) {
     displayOverallStatsChart(processedDataByGame);
     setupEventListeners();
 }
+
 
 // --- UI 표시 함수들 ---
 

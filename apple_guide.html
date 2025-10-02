@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple Store 구매 내역 다운로드 가이드</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: #fff;
+            padding: 30px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #eaeaea;
+            padding-bottom: 10px;
+        }
+
+        ol {
+            list-style-type: none;
+            counter-reset: step-counter;
+            padding-left: 0;
+        }
+
+        li {
+            counter-increment: step-counter;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        li::before {
+            content: counter(step-counter);
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #fff;
+            background-color: #555;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            min-width: 35px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+            margin-top: 5px;
+        }
+        
+        .step-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        p {
+            line-height: 1.6;
+            margin: 5px 0;
+        }
+
+        strong {
+            color: #e74c3c;
+        }
+
+        code {
+            background-color: #ecf0f1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+        
+        .note {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍎 Apple Store 구매 내역 다운로드 가이드</h1>
+        <p>결제 내역 분석을 위해 Apple의 문제 신고 페이지에서 구매 내역 HTML 파일을 저장하는 방법을 안내합니다.</p>
+
+        <ol>
+            <li>
+                <div class="step-content">
+                    <p>먼저 <a href="https://reportaproblem.apple.com/" target="_blank">Apple 문제 신고 사이트</a>에 접속하여 로그인합니다.</p>
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <p>로그인하면 최근 구입 항목이 표시됩니다. <strong>페이지 맨 아래로 스크롤하여 모든 과거 내역이 표시될 때까지 반복해서 스크롤을 끝까지 내려주세요.</strong></p>
+                    <p>(내역이 많을수록 로딩 시간이 걸릴 수 있습니다.)</p>
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <p>모든 내역이 로드되었으면, 웹 브라우저의 '페이지 저장' 기능을 실행합니다. (단축키: <strong>`Ctrl + S`</strong> 또는 <strong>`Cmd + S`</strong>)</p>
+                    <p>(오른쪽 마우스를 클릭해, '다른 이름으로 저장하기' 를 눌러 저장하셔도 됩니다!)</p>
+                    <img src="screenshot05.png" alt="오른쪽 마우스" style="width: 30%;">
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <p>파일 저장 창이 나타나면, 파일 형식을 <strong>`웹페이지, 전체`</strong> 또는 <strong>`Webpage, Complete`</strong>로 선택하고 저장합니다.</p>
+                     <p>이렇게 저장하면 <code>.html</code> 파일과 관련 리소스 폴더가 함께 생성됩니다. 저희에게 필요한 것은 <strong><code>.html</code> 파일</strong>입니다.</p>
+                </div>
+            </li>
+             <li>
+                <div class="step-content">
+                    <p>저장한 <code>.html</code> 파일을 Apple 결제 내역 분석기에 업로드하여 결과를 확인합니다.</p>
+                </div>
+            </li>
+        </ol>
+
+        <div class="note">
+            <p><strong>참고:</strong> 이 과정에서 저장한 HTML 파일은 사용자의 개인 컴퓨터에서만 처리되며, 분석기 웹페이지는 어떠한 데이터도 외부 서버로 전송하지 않습니다.</p>
+        </div>
+    </div>
+</body>
+</html>
