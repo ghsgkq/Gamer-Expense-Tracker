@@ -1,0 +1,258 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 800px;
+    background-color: #fff;
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+h1, h2, h3 {
+    color: #2c3e50;
+}
+
+h1, h2 {
+    border-bottom: 2px solid #eaeaea;
+    padding-bottom: 10px;
+}
+
+input[type="file"] {
+    margin: 20px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+#game-selector-section {
+    margin: 20px 0;
+}
+
+#game-selector {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    font-size: 1em;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 15px top 50%;
+    background-size: .65em auto;
+}
+
+
+.summary-box {
+    background-color: #e8f0fe;
+    border: 1px solid #d1e0fc;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.summary-box.secondary {
+    background-color: #e8f5e9;
+    border-color: #c8e6c9;
+    font-size: 1.1em;
+    margin-top: -10px;
+}
+
+.summary-box.tertiary {
+    background-color: #fff8e1;
+    border-color: #ffecb3;
+    font-size: 1.1em;
+    margin-top: -10px;
+}
+
+.summary-box.quaternary {
+    background-color: #f3e5f5;
+    border-color: #e1bee7;
+    font-size: 1.1em;
+    margin-top: -10px;
+}
+
+#filter-section {
+    margin: 20px 0;
+}
+
+#search-container {
+    margin-bottom: 15px;
+}
+
+#search-input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    box-sizing: border-box;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #f7f7f7;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+td:last-child {
+    text-align: right;
+    font-weight: 500;
+}
+
+#monthly-accordion .month-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    overflow: hidden;
+}
+
+#monthly-accordion .month-summary {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#monthly-accordion .month-summary:hover {
+    background-color: #f1f1f1;
+}
+
+#monthly-accordion .month-summary::before {
+    content: '▶';
+    margin-right: 10px;
+    transition: transform 0.3s ease;
+}
+
+#monthly-accordion .month-item.active .month-summary::before {
+    transform: rotate(90deg);
+}
+
+#monthly-accordion .month-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    background-color: #fff;
+}
+
+#monthly-accordion .month-item.active .month-details {
+    max-height: 500px; /* 펼쳐질 최대 높이, 내용물에 맞게 조절 가능 */
+    overflow-y: auto;
+}
+
+#monthly-accordion .month-details table {
+    margin-top: 0;
+    border-top: 1px solid #ddd;
+}
+
+.chart-title {
+    margin-top: 30px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #eaeaea;
+}
+
+#monthly-chart-container {
+    display: flex;
+    align-items: flex-end;
+    height: 250px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-top: 10px;
+    overflow-x: auto;
+    justify-content: flex-start;
+    -webkit-overflow-scrolling: touch;
+}
+
+#monthly-chart-container::-webkit-scrollbar { height: 8px; }
+#monthly-chart-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+#monthly-chart-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+#monthly-chart-container::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
+.chart-bar-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    height: 100%;
+    justify-content: flex-end;
+    min-width: 70px;
+    flex-shrink: 0;
+}
+
+.chart-amount {
+    font-size: 0.8em;
+    color: #333;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.chart-bar {
+    width: 40px;
+    background-color: #3498db;
+    border-radius: 5px 5px 0 0;
+    transition: height 0.5s ease-out;
+}
+
+.chart-bar:hover {
+    background-color: #2980b9;
+}
+
+.chart-label {
+    margin-top: 5px;
+    font-size: 0.75em;
+    color: #555;
+    white-space: pre;
+    height: 2.5em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hidden {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+    }
+    .chart-bar-wrapper { min-width: 55px; }
+    .chart-bar { width: 30px; }
+}
