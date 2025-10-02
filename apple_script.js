@@ -73,6 +73,7 @@ function getAppName(title, publisher) {
         'Yu-Gi-Oh! Master Duel': ['Yu-Gi-Oh! Master Duel', '유희왕 마스터 듀얼', '유희왕마스터듀얼'],
         '레조넌스': ['레조넌스', 'Resonance'],
         '신월동행' : ['신월동행', '신월 동행', 'New Moon Companion'],
+        '벽람항로' : ['벽람항로', 'Azur Lane'],
     };
 
     if (publisher) {
