@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History.json 파일 다운로드 가이드</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: #fff;
+            padding: 30px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #eaeaea;
+            padding-bottom: 10px;
+        }
+
+        ol {
+            list-style-type: none;
+            counter-reset: step-counter;
+            padding-left: 0;
+        }
+
+        li {
+            counter-increment: step-counter;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        li::before {
+            content: counter(step-counter);
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #fff;
+            background-color: #3498db;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            min-width: 35px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+            margin-top: 5px;
+        }
+        
+        .step-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        p {
+            line-height: 1.6;
+            margin: 5px 0;
+        }
+
+        strong {
+            color: #e74c3c;
+        }
+
+        code {
+            background-color: #ecf0f1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+        
+        .note {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📥 Google Play 주문 내역 다운로드 가이드</h1>
+        <p>결제 내역 분석을 위해 Google Takeout 서비스에서 <code>Order History.json</code> 파일을 다운로드하는 방법을 안내합니다.</p>
+
+        <ol>
+            <li>
+                <div class="step-content">
+                    <p>먼저 <a href="https://takeout.google.com/" target="_blank">Google Takeout 사이트</a>에 접속하여 로그인합니다.</p>
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <p><strong>'내보낼 데이터 선택'</strong> 단계에서 오른쪽 상단의 <strong>`모두 선택 해제`</strong> 버튼을 클릭하여 모든 항목을 비활성화합니다.</p>
+                    <img src="screenshot01.png" alt="모두 선택 해제 버튼">
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <p>스크롤을 내려 <strong>`Google Play 스토어`</strong> 항목의 체크박스만 선택합니다.</p>
+                    <img src="playStoreCheck.png" alt="Google Play 스토어 항목 선택">
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <p>페이지 가장 아래로 스크롤하여 <strong>`다음 단계`</strong> 버튼을 클릭합니다.</p>
+                    <img src="screenshot02.png" alt="다음버튼">
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <p><strong>'파일 형식, 빈도 및 대상 선택'</strong> 단계에서 기본 설정을 그대로 두고, <strong>`내보내기 생성`</strong> 버튼을 클릭합니다.</p>
+                    <ul>
+                        <li><strong>전송 대상</strong>: 이메일로 다운로드 링크 전송</li>
+                        <li><strong>빈도</strong>: 한 번만 내보내기</li>
+                        <li><strong>파일 형식 및 크기</strong>: .zip / 2GB</li>
+                    </ul>
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <p>내보내기가 완료되면 Google로부터 다운로드 링크가 포함된 이메일이 발송됩니다. (데이터 양에 따라 수 분에서 수 시간이 걸릴 수 있습니다)</p>
+                    <img src="screenshot03.png" alt="이메일 링크">
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <p>이메일의 링크를 통해 <code>.zip</code> 파일을 다운로드하고 압축을 해제합니다. 압축 해제된 폴더 안의 <code>Takeout/Google Play 스토어/</code> 경로에서 최종적으로 필요한 <strong>`Order History.json`</strong> 파일을 찾을 수 있습니다.</p>
+                     <img src="screenshot04.png" alt="파일">
+                </div>
+            </li>
+        </ol>
+
+        <div class="note">
+            <p><strong>참고:</strong> 이 과정에서 다운로드한 파일은 사용자의 개인 컴퓨터에서만 처리되며, 분석기 웹페이지는 어떠한 데이터도 외부 서버로 전송하지 않습니다.</p>
+        </div>
+    </div>
+</body>
+</html>

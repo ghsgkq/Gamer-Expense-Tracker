@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Play 결제 내역 분석기</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Google Play 결제 내역 분석기</h1>
+        <p>
+            Google Play에서 다운로드한 'Order History.json' 파일을 업로드하세요. 
+            (<a href="guide.html" target="_blank">파일 다운로드 가이드 보기</a>)
+        </p>
+        
+        <input type="file" id="jsonFile" accept=".json">
+
+        <div id="game-selector-section" class="hidden">
+            <h2>🕹️ 분석할 앱/게임 선택</h2>
+            <select id="game-selector"></select>
+        </div>
+
+        <div id="summary" class="summary-box"></div>
+        <div id="trickcal-specific-summary" class="hidden">
+            <div id="daily-summary" class="summary-box secondary"></div>
+            <div id="pass-summary" class="summary-box tertiary"></div>
+            <div id="sashik-pass-summary" class="summary-box quaternary"></div>
+        </div>
+
+        <div id="monthly-report" class="hidden">
+            <h2>📅 월별 결제 금액 요약 (클릭하여 내역 보기)</h2>
+            <div id="monthly-accordion"></div>
+            <h3 class="chart-title">월별 결제 차트</h3>
+            <div id="monthly-chart-container"></div>
+        </div>
+        <div id="full-history" class="hidden">
+            <h2>🧾 전체 결제 내역</h2>
+            
+            <div id="filter-section">
+                <div id="search-container">
+                    <input type="text" id="search-input" placeholder="상품명으로 검색...">
+                </div>
+            </div>
+
+            <table id="details-table"></table>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
