@@ -71,6 +71,8 @@ function getAppName(title, publisher) {
         '하스스톤': ['하스스톤', '하스스톤', 'Hearthstone'],
         'Yu-Gi-Oh! Duel Links': ['Yu-Gi-Oh! Duel Links', '유희왕 듀얼링크스', '유희왕 듀얼 링크스', '유희왕듀얼링크스'],
         'Yu-Gi-Oh! Master Duel': ['Yu-Gi-Oh! Master Duel', '유희왕 마스터 듀얼', '유희왕마스터듀얼'],
+        '레조넌스': ['레조넌스', 'Resonance'],
+        '신월동행' : ['신월동행', '신월 동행', 'New Moon Companion'],
     };
 
     if (publisher) {
