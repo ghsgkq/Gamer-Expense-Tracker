@@ -258,7 +258,7 @@ td:last-child {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 .chart-container {
@@ -269,6 +269,24 @@ td:last-child {
     border-radius: 8px;
     background-color: #fdfdfd;
 }
+
+
+.nav-link {
+    display: block;
+    text-align: center;
+    margin: -10px 0 20px 0;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #3498db;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+.nav-link:hover {
+    background-color: #e0e0e0;
+}
+
 
 @media (max-width: 600px) {
     .chart-bar-wrapper { min-width: 55px; }
