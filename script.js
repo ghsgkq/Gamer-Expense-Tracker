@@ -1,6 +1,7 @@
 // 결제 데이터를 저장하기 위한 전역 변수
 let processedDataByGame = {};
 let currentGameData = [];
+let overallChartInstance = null; // 전체 통계 차트 인스턴스
 
 // 파일 입력에 대한 이벤트 리스너
 document.getElementById('jsonFile').addEventListener('change', function(event) {
@@ -52,8 +53,10 @@ function getAppName(title) {
         '소녀전선2: 망명': ['소녀전선2', '소녀전선 2', '소녀전선2: 망명', '소녀전선2 망명', '소녀전선 망명'],
         '로스트 소드' : ['로스트 소드', 'Lost Sword'],
         '프린세스 커넥트! Re:Dive': ['프린세스 커넥트', '프린세스 커넥트! Re:Dive', '프린세스커넥트', '프린세스커넥트!Re:Dive'],
-
+        '붕괴3rd': ['붕괴3rd', '붕괴 3rd', '붕괴3', '붕괴 3'],
+        '젠레스 존 제로': ['젠레스 존 제로', '젠레스존제로', 'Zenless Zone Zero', 'ZenlessZoneZero']
     };
+
 
     // 키워드 매핑을 통해 앱 이름 찾기
     for (const appName in appKeywords) {
@@ -110,7 +113,22 @@ function processData(orders) {
         processedDataByGame[game].sort((a, b) => a.date - b.date);
     }
     
+    // 전체 총 결제액 및 과금 1위 게임 계산
+    let grandTotal = 0;
+    let topGame = { name: 'N/A', total: 0 };
+    
+    Object.keys(processedDataByGame).forEach(gameName => {
+        const total = processedDataByGame[gameName].reduce((sum, item) => sum + item.price, 0);
+        grandTotal += total;
+        if (total > topGame.total) {
+            topGame = { name: gameName, total: total };
+        }
+    });
+
+    displayOverallSummaries(grandTotal, topGame); // 새로운 요약 정보 표시 함수 호출
+
     populateGameSelector();
+    displayOverallStatsChart(processedDataByGame);
     setupEventListeners();
 }
 
@@ -120,11 +138,8 @@ function populateGameSelector() {
     const selectorSection = document.getElementById('game-selector-section');
     selector.innerHTML = '';
 
-    // processData 함수를 통해 생성된, '실제 결제 내역이 있는' 게임들의 목록만 가져옵니다.
-    // 따라서, json 파일에 내역이 없는 게임은 이 목록에 포함되지 않습니다.
     const availableGames = Object.keys(processedDataByGame);
 
-    // 총 결제액 순으로 게임 정렬
     const sortedGames = availableGames.sort((a, b) => {
         const totalA = processedDataByGame[a].reduce((sum, item) => sum + item.price, 0);
         const totalB = processedDataByGame[b].reduce((sum, item) => sum + item.price, 0);
@@ -145,7 +160,6 @@ function populateGameSelector() {
 
     selectorSection.classList.remove('hidden');
     
-    // 첫 번째 게임에 대한 초기 표시
     updateDisplayForGame(sortedGames[0]);
 }
 
@@ -156,13 +170,17 @@ function updateDisplayForGame(gameName) {
     displaySummary(currentGameData);
     
     const trickcalSummary = document.getElementById('trickcal-specific-summary');
+    const trickcalFilters = document.getElementById('trickcal-filter-buttons');
+
     if (gameName === '트릭컬 리바이브') {
         trickcalSummary.classList.remove('hidden');
+        trickcalFilters.classList.remove('hidden');
         displayDailyReport(currentGameData);
         displayPassReport(currentGameData);
         displaySashikPassReport(currentGameData);
     } else {
         trickcalSummary.classList.add('hidden');
+        trickcalFilters.classList.add('hidden');
     }
 
     document.getElementById('monthly-report').classList.remove('hidden');
@@ -170,13 +188,156 @@ function updateDisplayForGame(gameName) {
 
     displayMonthlyReport(currentGameData);
     displayFullHistory(currentGameData);
+    
+    document.getElementById('search-input').value = '';
+    trickcalFilters.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    const allButton = trickcalFilters.querySelector('[data-filter="all"]');
+    if(allButton) allButton.classList.add('active');
 }
 
 // --- 표시 함수 ---
 
+// 전체 요약 정보 표시
+function displayOverallSummaries(grandTotal, topGame) {
+    const overallSummarySection = document.getElementById('overall-summary-section');
+    const overallSummaryDiv = document.getElementById('overall-summary');
+    const topSpenderDiv = document.getElementById('top-spender-summary');
+
+    if (grandTotal > 0) {
+        overallSummaryDiv.innerHTML = `💸 모든 게임 총 결제액: <strong>₩${Math.round(grandTotal).toLocaleString()}</strong>`;
+        topSpenderDiv.innerHTML = `👑 가장 많이 결제한 게임: <strong>${topGame.name}</strong> (₩${Math.round(topGame.total).toLocaleString()})`;
+        overallSummarySection.classList.remove('hidden');
+    } else {
+        overallSummarySection.classList.add('hidden');
+    }
+}
+
+// 전체 통계 차트 표시
+function displayOverallStatsChart(data) {
+    const overallStatsSection = document.getElementById('overall-stats-section');
+    const ctx = document.getElementById('overall-spending-chart').getContext('2d');
+
+    if (Object.keys(data).length === 0) {
+        overallStatsSection.classList.add('hidden');
+        return;
+    }
+    overallStatsSection.classList.remove('hidden');
+
+    // 1. 전체 데이터에서 가장 빠른 날짜와 가장 늦은 날짜 찾기
+    let minDate = new Date();
+    let maxDate = new Date(1970, 0, 1);
+    Object.values(data).flat().forEach(item => {
+        if (item.date < minDate) minDate = item.date;
+        if (item.date > maxDate) maxDate = item.date;
+    });
+
+    // 2. 6개월 단위의 차트 라벨 생성
+    const chartLabels = [];
+    const periodKeys = []; // '2023-H1' 형식의 키
+    let currentDate = new Date(minDate.getFullYear(), minDate.getMonth() < 6 ? 0 : 6, 1);
+
+    while (currentDate <= maxDate) {
+        const year = currentDate.getFullYear();
+        const isFirstHalf = currentDate.getMonth() < 6;
+        chartLabels.push(`${year}년 ${isFirstHalf ? '상반기' : '하반기'}`);
+        periodKeys.push(`${year}-${isFirstHalf ? 'H1' : 'H2'}`);
+        currentDate.setMonth(currentDate.getMonth() + 6);
+    }
+
+    // 3. 총 결제액 기준 상위 7개 게임 선정
+    const gameTotals = Object.keys(data).map(gameName => ({
+        name: gameName,
+        total: data[gameName].reduce((sum, item) => sum + item.price, 0)
+    }));
+    const topGames = gameTotals.sort((a, b) => b.total - a.total).slice(0, 7);
+
+    // 4. 각 게임의 누적 데이터를 6개월 단위로 집계
+    const datasets = topGames.map((game, index) => {
+        const periodTotals = {};
+        periodKeys.forEach(key => periodTotals[key] = 0);
+
+        data[game.name].forEach(item => {
+            const year = item.date.getFullYear();
+            const isFirstHalf = item.date.getMonth() < 6;
+            const key = `${year}-${isFirstHalf ? 'H1' : 'H2'}`;
+            if (periodTotals.hasOwnProperty(key)) {
+                periodTotals[key] += item.price;
+            }
+        });
+
+        const cumulativeData = [];
+        let cumulativeTotal = 0;
+        periodKeys.forEach(key => {
+            cumulativeTotal += periodTotals[key];
+            cumulativeData.push(cumulativeTotal);
+        });
+
+        const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#34495e', '#1abc9c'];
+        const color = colors[index % colors.length];
+
+        return {
+            label: game.name,
+            data: cumulativeData,
+            borderColor: color,
+            backgroundColor: color + '33',
+            fill: false,
+            tension: 0.1
+        };
+    });
+
+    if (overallChartInstance) {
+        overallChartInstance.destroy();
+    }
+    overallChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartLabels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: '누적 결제액 상위 게임 추이'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) label += ': ';
+                            if (context.parsed.y !== null) {
+                                label += '₩' + Math.round(context.parsed.y).toLocaleString();
+                            }
+                            return label;
+                        }
+                    }
+                },
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: '기간' }
+                },
+                y: {
+                    title: { display: true, text: '누적 결제액 (₩)' },
+                    ticks: {
+                        callback: function(value) {
+                            return '₩' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+
 function displaySummary(data) {
     const totalSpent = data.reduce((sum, item) => sum + item.price, 0);
-    document.getElementById('summary').innerHTML = `선택된 앱/게임 총 결제 금액: <strong>₩${Math.round(totalSpent).toLocaleString()}</strong>`;
+    document.getElementById('summary').innerHTML = `<strong>선택된 앱/게임</strong> 총 결제액: <strong>₩${Math.round(totalSpent).toLocaleString()}</strong>`;
 }
 
 // 트릭컬 리바이브 관련 특별 보고서
@@ -334,6 +495,33 @@ function setupEventListeners() {
         if (summary) {
             summary.parentElement.classList.toggle('active');
         }
+    });
+
+    // 트릭컬 리바이브 전용 필터 버튼
+    const buttons = document.querySelectorAll('#trickcal-filter-buttons .filter-btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            if (document.getElementById('game-selector').value !== '트릭컬 리바이브') return;
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            searchInput.value = "";
+
+            const filter = button.dataset.filter;
+            let filteredData;
+
+            if (filter === 'all') {
+                filteredData = currentGameData;
+            } else if (filter === 'pass_basic') {
+                const passKeywords = ["리바이브 패스", "트릭컬 패스"];
+                filteredData = currentGameData.filter(item => passKeywords.some(keyword => item.title.includes(keyword)));
+            } else if (filter === 'pass_sashik') {
+                filteredData = currentGameData.filter(item => item.title.includes("사복 패스") || item.title.includes("사복패스"));
+            } else {
+                filteredData = currentGameData.filter(item => item.title.includes(filter));
+            }
+            displayFullHistory(filteredData);
+        });
     });
 }
 
