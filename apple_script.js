@@ -61,7 +61,8 @@ function getAppName(title, publisher) {
         '로스트 소드' : ['로스트 소드', 'Lost Sword'],
         '프린세스 커넥트! Re:Dive': ['프린세스 커넥트', '프린세스 커넥트! Re:Dive', '프린세스커넥트', '프린세스커넥트!Re:Dive'],
         '붕괴3rd': ['붕괴3rd', '붕괴 3rd', '붕괴3', '붕괴 3'],
-        '젠레스 존 제로': ['젠레스 존 제로', '젠레스존제로', 'Zenless Zone Zero', 'ZenlessZoneZero']
+        '젠레스 존 제로': ['젠레스 존 제로', '젠레스존제로', 'Zenless Zone Zero', 'ZenlessZoneZero'],
+        '리버스: 1999': ['리버스 1999', '리버스1999', 'REVERSE 1999', '리버스: 1999', '리버스:1999', 'REVERSE: 1999', 'REVERSE:1999'],
     };
 
     if (publisher) {
