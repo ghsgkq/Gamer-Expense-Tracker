@@ -66,7 +66,9 @@ function getAppName(title, publisher) {
         '에버소울': ['에버소울', 'Eversoul'],
         '스카이 킹덤：드래곤 에이지' : ['스카이 킹덤', '스카이 킹덤：드래곤 에이지', 'Sky Kingdom: Dragon Age'],
         'Merge Mansion' : ['Merge Mansion', '머지 맨션'],
-        'Valkyrie Connect' : ['Valkyrie Connect', '발키리']
+        'Valkyrie Connect' : ['Valkyrie Connect', '발키리'],
+        '포켓몬 카드 게임 Pocket': ['포켓몬 카드 게임 Pocket','포켓몬 카드 게임', '포켓몬카드게임', 'Pokémon TCG', 'Pokémon TCG Online'],
+        '하스스톤': ['하스스톤', '하스스톤', 'Hearthstone'],
     };
 
     if (publisher) {
