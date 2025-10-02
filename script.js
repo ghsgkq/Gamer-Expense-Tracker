@@ -54,6 +54,9 @@ function getAppName(title) {
         '젠레스 존 제로': ['젠레스 존 제로', '젠레스존제로', 'Zenless Zone Zero', 'ZenlessZoneZero'],
         '리버스: 1999': ['리버스 1999', '리버스1999', 'REVERSE 1999', '리버스: 1999', '리버스:1999', 'REVERSE: 1999', 'REVERSE:1999'],
         '에버소울': ['에버소울', 'Eversoul'],
+        '스카이 킹덤：드래곤 에이지' : ['스카이 킹덤', '스카이 킹덤：드래곤 에이지', 'Sky Kingdom: Dragon Age'],
+        'Merge Mansion' : ['Merge Mansion', '머지 맨션'],
+        'Valkyrie Connect' : ['Valkyrie Connect', '발키리']
     };
 
     if (title) {
