@@ -59,6 +59,8 @@ function getAppName(title) {
         'Valkyrie Connect' : ['Valkyrie Connect', '발키리'],
         '포켓몬 카드 게임 Pocket': ['포켓몬 카드 게임 Pocket','포켓몬 카드 게임', '포켓몬카드게임', 'Pokémon TCG', 'Pokémon TCG Online'],
         '하스스톤': ['하스스톤', '하스스톤', 'Hearthstone'],
+        'Yu-Gi-Oh! Duel Links': ['Yu-Gi-Oh! Duel Links', '유희왕 듀얼링크스', '유희왕 듀얼 링크스', '유희왕듀얼링크스'],
+        'Yu-Gi-Oh! Master Duel': ['Yu-Gi-Oh! Master Duel', '유희왕 마스터 듀얼', '유희왕마스터듀얼'],
     };
 
     if (title) {
