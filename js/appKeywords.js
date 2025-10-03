@@ -41,4 +41,5 @@
         'SD건담 지 제네레이션 이터널' : ['SD건담 지 제네레이션 이터널', 'SD건담지제네레이션이터널', 'SD Gundam G Generation Eternal'],
         '프로젝트 세카이 컬러풀 스테이지! feat. 하츠네 미쿠' : ['프로젝트 세카이', '프로젝트 세카이 컬러풀 스테이지! feat. 하츠네 미쿠', '프로젝트세카이컬러풀스테이지!feat.하츠네미쿠', 'Project Sekai: Colorful Stage! feat. Hatsune Miku'],
         '크루세이더 퀘스트' : ['크루세이더 퀘스트', '크루세이더퀘스트', 'Crusaders Quest'],
+        '월드 플리퍼' : ['월드 플리퍼', '월드플리퍼', 'World Flipper'],
     };
