@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apple Store 구매 내역 다운로드 가이드</title>
+    <title>Order History.json 파일 다운로드 가이드</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
 
@@ -50,7 +50,7 @@
             font-size: 1.5em;
             font-weight: bold;
             color: #fff;
-            background-color: #555;
+            background-color: #3498db;
             border-radius: 50%;
             width: 35px;
             height: 35px;
@@ -108,7 +108,6 @@
             border-radius: 4px;
         }
 
-        
         .warning-box {
             background-color: #fff0f0;
             border: 2px solid #e74c3c;
@@ -128,50 +127,67 @@
 </head>
 <body>
     <div class="container">
-        <h1>🍎 Apple Store 구매 내역 다운로드 가이드</h1>
-         <div class="warning-box">
+        <h1>📥 Google Play 주문 내역 다운로드 가이드</h1>
+
+        <div class="warning-box">
             <h2>⚠️ 중요: 개인정보 보호 경고</h2>
-            <p>저장하는 HTML 파일에는 사용자의 이름, 주소, 결제 수단 일부 등 매우 민감한 개인정보가 포함될 수 있습니다.</p>
+            <p>이 파일에는 사용자의 이름, 주소, IP 주소, 결제 카드 일부 정보 등 매우 민감한 개인정보가 포함되어 있습니다.</p>
             <p>절대로 이 파일을 다른 사람에게 공유하거나 공개된 장소에 업로드하지 마세요.</p>
             <p>이 분석기는 사용자의 컴퓨터에서만 파일을 처리하며, 어떠한 데이터도 외부 서버로 전송하지 않습니다.</p>
             <p>공개된 장소에서 해당 파일을 다운로드 하지마세요.</p>
         </div>
-        <p>결제 내역 분석을 위해 Apple의 문제 신고 페이지에서 구매 내역 HTML 파일을 저장하는 방법을 안내합니다.</p>
+        <p>결제 내역 분석을 위해 Google Takeout 서비스에서 <code>Order History.json</code> 파일을 다운로드하는 방법을 안내합니다.</p>
 
         <ol>
             <li>
                 <div class="step-content">
-                    <p>먼저 <a href="https://reportaproblem.apple.com/" target="_blank">Apple 문제 신고 사이트</a>에 접속하여 로그인합니다.</p>
+                    <p>먼저 <a href="https://takeout.google.com/" target="_blank">Google Takeout 사이트</a>에 접속하여 로그인합니다.</p>
                 </div>
             </li>
             <li>
                 <div class="step-content">
-                    <p>로그인하면 최근 구입 항목이 표시됩니다. <strong>페이지 맨 아래로 스크롤하여 모든 과거 내역이 표시될 때까지 반복해서 스크롤을 끝까지 내려주세요.</strong></p>
-                    <p>(내역이 많을수록 로딩 시간이 걸릴 수 있습니다.)</p>
+                    <p><strong>'내보낼 데이터 선택'</strong> 단계에서 오른쪽 상단의 <strong>`모두 선택 해제`</strong> 버튼을 클릭하여 모든 항목을 비활성화합니다.</p>
+                    <img src="../image/screenshot01.png" alt="모두 선택 해제 버튼">
                 </div>
             </li>
             <li>
                 <div class="step-content">
-                    <p>모든 내역이 로드되었으면, 웹 브라우저의 '페이지 저장' 기능을 실행합니다. (단축키: <strong>`Ctrl + S`</strong> 또는 <strong>`Cmd + S`</strong>)</p>
-                    <p>(오른쪽 마우스를 클릭해, '다른 이름으로 저장하기' 를 눌러 저장하셔도 됩니다!)</p>
-                    <img src="image/screenshot05.png" alt="오른쪽 마우스" style="width: 30%;">
+                    <p>스크롤을 내려 <strong>`Google Play 스토어`</strong> 항목의 체크박스만 선택합니다.</p>
+                    <img src="../image/playStoreCheck.png" alt="Google Play 스토어 항목 선택">
                 </div>
             </li>
             <li>
                 <div class="step-content">
-                    <p>파일 저장 창이 나타나면, 파일 형식을 <strong>`웹페이지, 전체`</strong> 또는 <strong>`Webpage, Complete`</strong>로 선택하고 저장합니다.</p>
-                     <p>이렇게 저장하면 <code>.html</code> 파일과 관련 리소스 폴더가 함께 생성됩니다. 저희에게 필요한 것은 <strong><code>.html</code> 파일</strong>입니다.</p>
+                    <p>페이지 가장 아래로 스크롤하여 <strong>`다음 단계`</strong> 버튼을 클릭합니다.</p>
+                    <img src="../image/screenshot02.png" alt="다음버튼">
                 </div>
             </li>
-             <li>
+            <li>
                 <div class="step-content">
-                    <p>저장한 <code>.html</code> 파일을 Apple 결제 내역 분석기에 업로드하여 결과를 확인합니다.</p>
+                    <p><strong>'파일 형식, 빈도 및 대상 선택'</strong> 단계에서 기본 설정을 그대로 두고, <strong>`내보내기 생성`</strong> 버튼을 클릭합니다.</p>
+                    <ul>
+                        <li><strong>전송 대상</strong>: 이메일로 다운로드 링크 전송</li>
+                        <li><strong>빈도</strong>: 한 번만 내보내기</li>
+                        <li><strong>파일 형식 및 크기</strong>: .zip / 2GB</li>
+                    </ul>
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <p>내보내기가 완료되면 Google로부터 다운로드 링크가 포함된 이메일이 발송됩니다. (데이터 양에 따라 수 분에서 수 시간이 걸릴 수 있습니다)</p>
+                    <img src="../image/screenshot03.png" alt="이메일 링크">
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <p>이메일의 링크를 통해 <code>.zip</code> 파일을 다운로드하고 압축을 해제합니다. 압축 해제된 폴더 안의 <code>Takeout/Google Play 스토어/</code> 경로에서 최종적으로 필요한 <strong>`Order History.json`</strong> 파일을 찾을 수 있습니다.</p>
+                     <img src="../image/screenshot04.png" alt="파일">
                 </div>
             </li>
         </ol>
 
         <div class="note">
-            <p><strong>참고:</strong> 이 과정에서 저장한 HTML 파일은 사용자의 개인 컴퓨터에서만 처리되며, 분석기 웹페이지는 어떠한 데이터도 외부 서버로 전송하지 않습니다.</p>
+            <p><strong>참고:</strong> 이 과정에서 다운로드한 파일은 사용자의 개인 컴퓨터에서만 처리되며, 분석기 웹페이지는 어떠한 데이터도 외부 서버로 전송하지 않습니다.</p>
         </div>
     </div>
 </body>

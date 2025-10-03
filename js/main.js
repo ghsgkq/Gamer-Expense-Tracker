@@ -1,10 +1,22 @@
 // 전역 변수
-let processedDataByGame = {};
+let combinedData = {};
 let currentGameData = [];
 let overallChartInstance = null;
 
-// 파일 입력 이벤트 리스너
-document.getElementById('fileInput').addEventListener('change', function(event) {
+// 파일 입력 이벤트 리스너 설정
+function setupFileInputListeners() {
+    const googleFileInput = document.getElementById('googleFileInput');
+    const appleFileInput = document.getElementById('appleFileInput');
+
+    if (googleFileInput) {
+        googleFileInput.addEventListener('change', (event) => handleFileUpload(event, 'google'));
+    }
+    if (appleFileInput) {
+        appleFileInput.addEventListener('change', (event) => handleFileUpload(event, 'apple'));
+    }
+}
+
+function handleFileUpload(event, type) {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -12,39 +24,25 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
     reader.onload = function(e) {
         try {
             const fileContent = e.target.result;
-            if (file.name.endsWith('.json')) {
+            let newData;
+
+            if (type === 'google' && file.name.endsWith('.json')) {
                 const orders = JSON.parse(fileContent);
-                processedDataByGame = parseGoogleData(orders);
-            } else if (file.name.endsWith('.html') || file.name.endsWith('.htm')) {
+                newData = parseGoogleData(orders);
+                document.getElementById('googleFileStatus').textContent = `✅ ${file.name} 로드됨`;
+            } else if (type === 'apple' && (file.name.endsWith('.html') || file.name.endsWith('.htm'))) {
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(fileContent, "text/html");
-                processedDataByGame = parseAppleData(doc);
+                newData = parseAppleData(doc);
+                 document.getElementById('appleFileStatus').textContent = `✅ ${file.name} 로드됨`;
             } else {
-                alert('지원하지 않는 파일 형식입니다. .json 또는 .html 파일을 업로드해주세요.');
+                alert('잘못된 파일 형식입니다.');
+                event.target.value = ''; // 파일 선택 초기화
                 return;
             }
             
-            // 데이터 정렬
-            for (const game in processedDataByGame) {
-                processedDataByGame[game].sort((a, b) => a.date - b.date);
-            }
-
-            // 전체 통계 계산
-            let grandTotal = 0;
-            let topGame = { name: 'N/A', total: 0 };
-            Object.keys(processedDataByGame).forEach(gameName => {
-                const total = processedDataByGame[gameName].reduce((sum, item) => sum + item.price, 0);
-                grandTotal += total;
-                if (total > topGame.total) {
-                    topGame = { name: gameName, total: total };
-                }
-            });
-
-            // UI 업데이트
-            displayOverallSummaries(grandTotal, topGame);
-            populateGameSelector();
-            displayOverallStatsChart(processedDataByGame);
-            setupEventListeners();
+            mergeData(newData);
+            updateUI();
 
         } catch (error) {
             alert('파일을 처리하는 중 오류가 발생했습니다.');
@@ -52,7 +50,45 @@ document.getElementById('fileInput').addEventListener('change', function(event) 
         }
     };
     reader.readAsText(file, 'UTF-8');
-});
+}
+
+function mergeData(newData) {
+    for (const gameName in newData) {
+        if (combinedData[gameName]) {
+            // 중복 데이터 방지를 위해 간단한 ID 생성 및 확인
+            newData[gameName].forEach(newItem => {
+                const newItemId = `${newItem.date.toISOString()}-${newItem.title}-${newItem.price}`;
+                const isDuplicate = combinedData[gameName].some(existingItem => {
+                    const existingItemId = `${existingItem.date.toISOString()}-${existingItem.title}-${existingItem.price}`;
+                    return existingItemId === newItemId;
+                });
+                if (!isDuplicate) {
+                    combinedData[gameName].push(newItem);
+                }
+            });
+        } else {
+            combinedData[gameName] = newData[gameName];
+        }
+        // 날짜순으로 정렬하여 병합된 데이터의 순서 유지
+        combinedData[gameName].sort((a, b) => a.date - b.date);
+    }
+}
+
+function updateUI() {
+    let grandTotal = 0;
+    let topGame = { name: 'N/A', total: 0 };
+    Object.keys(combinedData).forEach(gameName => {
+        const total = combinedData[gameName].reduce((sum, item) => sum + item.price, 0);
+        grandTotal += total;
+        if (total > topGame.total) {
+            topGame = { name: gameName, total: total };
+        }
+    });
+
+    displayOverallSummaries(grandTotal, topGame);
+    populateGameSelector();
+    displayOverallStatsChart(combinedData);
+}
 
 
 // --- UI 표시 함수들 ---
@@ -76,17 +112,17 @@ function populateGameSelector() {
     const selectorSection = document.getElementById('game-selector-section');
     selector.innerHTML = '';
 
-    const sortedGames = Object.keys(processedDataByGame).sort((a, b) => {
-        const totalA = processedDataByGame[a].reduce((sum, item) => sum + item.price, 0);
-        const totalB = processedDataByGame[b].reduce((sum, item) => sum + item.price, 0);
+    const sortedGames = Object.keys(combinedData).sort((a, b) => {
+        const totalA = combinedData[a].reduce((sum, item) => sum + item.price, 0);
+        const totalB = combinedData[b].reduce((sum, item) => sum + item.price, 0);
         return totalB - totalA;
     });
 
     if (sortedGames.length === 0) {
-        alert('분석할 결제 내역이 없습니다. 무료 항목을 제외하고 유효한 결제가 있는지 확인해주세요.');
         selectorSection.classList.add('hidden');
         document.getElementById('overall-summary-section').classList.add('hidden');
         document.getElementById('overall-stats-section').classList.add('hidden');
+        // 분석할 내역이 없다는 알림은 파일 로드 시점에 하는 것이 더 적합
         return;
     }
 
@@ -98,11 +134,17 @@ function populateGameSelector() {
     });
 
     selectorSection.classList.remove('hidden');
-    updateDisplayForGame(sortedGames[0]);
+    // 현재 선택된 게임이 목록에 여전히 있는지 확인, 없으면 첫 번째 항목으로 변경
+    const currentSelectedGame = selector.value;
+    if (!sortedGames.includes(currentSelectedGame)) {
+        updateDisplayForGame(sortedGames[0]);
+    } else {
+        updateDisplayForGame(currentSelectedGame);
+    }
 }
 
 function updateDisplayForGame(gameName) {
-    currentGameData = processedDataByGame[gameName] || [];
+    currentGameData = combinedData[gameName] || [];
     
     displaySummary(currentGameData);
     
@@ -392,50 +434,98 @@ function displayOverallStatsChart(data) {
 
 function setupEventListeners() {
     const gameSelector = document.getElementById('game-selector');
-    gameSelector.addEventListener('change', (e) => {
-        updateDisplayForGame(e.target.value);
-    });
+    if(gameSelector){
+        gameSelector.addEventListener('change', (e) => {
+            updateDisplayForGame(e.target.value);
+        });
+    }
 
     const searchInput = document.getElementById('search-input');
-    searchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        const filteredData = currentGameData.filter(item => 
-            item.title.toLowerCase().includes(searchTerm)
-        );
-        displayFullHistory(filteredData);
-    });
-
-    const accordionContainer = document.getElementById('monthly-accordion');
-    accordionContainer.addEventListener('click', function(e) {
-        const summary = e.target.closest('.month-summary');
-        if (summary) {
-            summary.parentElement.classList.toggle('active');
-        }
-    });
-
-    const buttons = document.querySelectorAll('#trickcal-filter-buttons .filter-btn');
-    buttons.forEach(button => {
-        button.addEventListener('click', () => {
-            if (document.getElementById('game-selector').value !== '트릭컬 리바이브') return;
-            
-            buttons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            searchInput.value = "";
-
-            const filter = button.dataset.filter;
-            let filteredData;
-
-            if (filter === 'all') {
-                filteredData = currentGameData;
-            } else if (filter === 'pass_basic') {
-                const passKeywords = ["리바이브 패스", "트릭컬 패스"];
-                filteredData = currentGameData.filter(item => passKeywords.some(keyword => item.title.includes(keyword)));
-            } else if (filter === 'pass_sashik') {
-                filteredData = currentGameData.filter(item => item.title.includes("사복 패스") || item.title.includes("사복패스"));
-            } else {
-                filteredData = currentGameData.filter(item => item.title.includes(filter));
-            }
+    if(searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredData = currentGameData.filter(item => 
+                item.title.toLowerCase().includes(searchTerm)
+            );
             displayFullHistory(filteredData);
         });
-    });
+    }
+
+    const accordionContainer = document.getElementById('monthly-accordion');
+    if(accordionContainer) {
+        accordionContainer.addEventListener('click', function(e) {
+            const summary = e.target.closest('.month-summary');
+            if (summary) {
+                summary.parentElement.classList.toggle('active');
+            }
+        });
+    }
+
+    const buttons = document.querySelectorAll('#trickcal-filter-buttons .filter-btn');
+    if(buttons) {
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                if (document.getElementById('game-selector').value !== '트릭컬 리바이브') return;
+                
+                buttons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                searchInput.value = "";
+    
+                const filter = button.dataset.filter;
+                let filteredData;
+    
+                if (filter === 'all') {
+                    filteredData = currentGameData;
+                } else if (filter === 'pass_basic') {
+                    const passKeywords = ["리바이브 패스", "트릭컬 패스"];
+                    filteredData = currentGameData.filter(item => passKeywords.some(keyword => item.title.includes(keyword)));
+                } else if (filter === 'pass_sashik') {
+                    filteredData = currentGameData.filter(item => item.title.includes("사복 패스") || item.title.includes("사복패스"));
+                } else {
+                    filteredData = currentGameData.filter(item => item.title.includes(filter));
+                }
+                displayFullHistory(filteredData);
+            });
+        });
+    }
+    
+    const resetButton = document.getElementById('resetButton');
+    if (resetButton) {
+        resetButton.addEventListener('click', () => {
+            // 전역 데이터 초기화
+            combinedData = {};
+            currentGameData = [];
+            if (overallChartInstance) {
+                overallChartInstance.destroy();
+                overallChartInstance = null;
+            }
+    
+            // UI 초기화
+            document.getElementById('overall-summary-section').classList.add('hidden');
+            document.getElementById('overall-stats-section').classList.add('hidden');
+            document.getElementById('game-selector-section').classList.add('hidden');
+            document.getElementById('summary').classList.add('hidden');
+            document.getElementById('trickcal-specific-summary').classList.add('hidden');
+            document.getElementById('monthly-report').classList.add('hidden');
+            document.getElementById('full-history').classList.add('hidden');
+            
+            // 파일 입력 필드 및 상태 초기화
+            const googleInput = document.getElementById('googleFileInput');
+            const appleInput = document.getElementById('appleFileInput');
+            const googleStatus = document.getElementById('googleFileStatus');
+            const appleStatus = document.getElementById('appleFileStatus');
+
+            if(googleInput) googleInput.value = '';
+            if(appleInput) appleInput.value = '';
+            if(googleStatus) googleStatus.textContent = '';
+            if(appleStatus) appleStatus.textContent = '';
+        });
+    }
 }
+
+// 초기 로드 시 이벤트 리스너 설정
+document.addEventListener('DOMContentLoaded', () => {
+    setupFileInputListeners();
+    setupEventListeners();
+});
+
