@@ -1,168 +1,58 @@
-// 전역 변수로 데이터 저장
+// 전역 변수
 let processedDataByGame = {};
 let currentGameData = [];
 let overallChartInstance = null;
 
-// HTML 파일 입력 이벤트 리스너
-document.getElementById('htmlFile').addEventListener('change', function(event) {
+// 파일 입력 이벤트 리스너
+document.getElementById('fileInput').addEventListener('change', function(event) {
     const file = event.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            const htmlContent = e.target.result;
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(htmlContent, "text/html");
-            processHtmlData(doc);
+            const fileContent = e.target.result;
+            if (file.name.endsWith('.json')) {
+                const orders = JSON.parse(fileContent);
+                processedDataByGame = parseGoogleData(orders);
+            } else if (file.name.endsWith('.html') || file.name.endsWith('.htm')) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(fileContent, "text/html");
+                processedDataByGame = parseAppleData(doc);
+            } else {
+                alert('지원하지 않는 파일 형식입니다. .json 또는 .html 파일을 업로드해주세요.');
+                return;
+            }
+            
+            // 데이터 정렬
+            for (const game in processedDataByGame) {
+                processedDataByGame[game].sort((a, b) => a.date - b.date);
+            }
+
+            // 전체 통계 계산
+            let grandTotal = 0;
+            let topGame = { name: 'N/A', total: 0 };
+            Object.keys(processedDataByGame).forEach(gameName => {
+                const total = processedDataByGame[gameName].reduce((sum, item) => sum + item.price, 0);
+                grandTotal += total;
+                if (total > topGame.total) {
+                    topGame = { name: gameName, total: total };
+                }
+            });
+
+            // UI 업데이트
+            displayOverallSummaries(grandTotal, topGame);
+            populateGameSelector();
+            displayOverallStatsChart(processedDataByGame);
+            setupEventListeners();
+
         } catch (error) {
-            alert('잘못된 HTML 파일입니다.');
-            console.error("HTML 파싱 오류:", error);
+            alert('파일을 처리하는 중 오류가 발생했습니다.');
+            console.error("파일 처리 오류:", error);
         }
     };
     reader.readAsText(file, 'UTF-8');
 });
-
-// 가격 문자열에서 숫자만 추출
-function cleanPrice(priceStr) {
-    if (typeof priceStr !== 'string') return 0;
-    return parseInt(priceStr.replace(/[^0-9]/g, ''), 10) || 0;
-}
-
-// 'YYYY년 MM월 DD일' 형식의 날짜 문자열을 Date 객체로 변환
-function parseKoreanDate(dateStr) {
-    const parts = dateStr.match(/(\d{4})년 (\d{1,2})월 (\d{1,2})일/);
-    if (!parts) return null;
-    // new Date(year, monthIndex, day)
-    return new Date(parts[1], parts[2] - 1, parts[3]);
-}
-
-// 상품명에서 앱/게임 이름 추출
-function getAppName(title, publisher) {
-    // 앱 이름과 관련 키워드 매핑
-    const appKeywords = {
-        '트릭컬 리바이브': ['트릭컬 리바이브', '트릭컬'],
-        '명조:워더링 웨이브': ['명조:워더링 웨이브', '명조', 'Wuthering Waves'],
-        '가디언 테일즈': ['가디언 테일즈'],
-        '쿠키런: 오븐브레이크': ['쿠키런: 오븐브레이크'],
-        '블루 아카이브': ['블루 아카이브', 'Blue Archive'],
-        '원신': ['원신', 'Genshin Impact'],
-        '마비노기 모바일' : ['마비노기 모바일', '마비노기M'],
-        '붕괴: 스타레일': ['붕괴: 스타레일', '붕괴스타레일','붕괴:스타레일'],
-        '승리의 여신: 니케': ['승리의 여신: 니케', '니케', '승리의 여신:니케', 'GODDESS OF VICTORY: NIKKE'],
-        '쿠키런: 킹덤': ['쿠키런: 킹덤', '쿠키런 킹덤', '쿠키런킹덤', '쿠키런:킹덤'],
-        '명일방주': ['명일방주'],
-        'Limbus Company': ['Limbus Company', '림버스 컴퍼니', '림버스컴퍼니'],
-        '페이트/그랜드 오더': ['페이트/그랜드 오더', '페그오', 'Fate/Grand Order'],
-        '에픽세븐': ['에픽세븐', '에픽 세븐'],
-        '우마무스메 프리티 더비': ['우마무스메', '우마무스메 프리티 더비', '우마무스메: 프리티 더비', '우마무스메프리티더비'],
-        '브라운더스트2': ['브라운더스트2', '브라운더스트 2', '브라운더스트II', '브라운더스트 II'],
-        '소녀전선2: 망명': ['소녀전선2', '소녀전선 2', '소녀전선2: 망명', '소녀전선2 망명', '소녀전선 망명'],
-        '로스트 소드' : ['로스트 소드', 'Lost Sword'],
-        '프린세스 커넥트! Re:Dive': ['프린세스 커넥트', '프린세스 커넥트! Re:Dive', '프린세스커넥트', '프린세스커넥트!Re:Dive'],
-        '붕괴3rd': ['붕괴3rd', '붕괴 3rd', '붕괴3', '붕괴 3'],
-        '젠레스 존 제로': ['젠레스 존 제로', '젠레스존제로', 'Zenless Zone Zero', 'ZenlessZoneZero'],
-        '리버스: 1999': ['리버스 1999', '리버스1999', 'REVERSE 1999', '리버스: 1999', '리버스:1999', 'REVERSE: 1999', 'REVERSE:1999'],
-        '에버소울': ['에버소울', 'Eversoul'],
-        '스카이 킹덤：드래곤 에이지' : ['스카이 킹덤', '스카이 킹덤：드래곤 에이지', 'Sky Kingdom: Dragon Age'],
-        'Merge Mansion' : ['Merge Mansion', '머지 맨션'],
-        'Valkyrie Connect' : ['Valkyrie Connect', '발키리'],
-        '포켓몬 카드 게임 Pocket': ['포켓몬 카드 게임 Pocket','포켓몬 카드 게임', '포켓몬카드게임', 'Pokémon TCG', 'Pokémon TCG Online'],
-        '하스스톤': ['하스스톤', '하스스톤', 'Hearthstone'],
-        'Yu-Gi-Oh! Duel Links': ['Yu-Gi-Oh! Duel Links', '유희왕 듀얼링크스', '유희왕 듀얼 링크스', '유희왕듀얼링크스'],
-        'Yu-Gi-Oh! Master Duel': ['Yu-Gi-Oh! Master Duel', '유희왕 마스터 듀얼', '유희왕마스터듀얼'],
-        '레조넌스': ['레조넌스', 'Resonance'],
-        '신월동행' : ['신월동행', '신월 동행', 'New Moon Companion'],
-        '벽람항로' : ['벽람항로', 'Azur Lane'],
-    };
-
-    if (publisher) {
-        for (const appName in appKeywords) {
-            for (const keyword of appKeywords[appName]) {
-                if (publisher.includes(keyword)) {
-                    return appName;
-                }
-            }
-        }
-    }
-    
-    // 퍼블리셔로 못찾으면 타이틀로 다시 검색
-    if (title) {
-        for (const appName in appKeywords) {
-            for (const keyword of appKeywords[appName]) {
-                if (title.includes(keyword)) {
-                    return appName;
-                }
-            }
-        }
-    }
-    
-    // 키워드 목록에 없으면 '기타'로 분류
-    return '기타';
-}
-
-
-// HTML 데이터 처리
-function processHtmlData(doc) {
-    processedDataByGame = {};
-    const purchaseElements = doc.querySelectorAll('.purchase');
-
-    purchaseElements.forEach(purchase => {
-        const dateEl = purchase.querySelector('.invoice-date');
-        if (!dateEl) return;
-
-        const date = parseKoreanDate(dateEl.textContent.trim());
-        if (!date) return;
-
-        const itemElements = purchase.querySelectorAll('li.pli');
-
-        itemElements.forEach(item => {
-            const titleEl = item.querySelector('.pli-title div');
-            const priceEl = item.querySelector('.pli-price');
-            const publisherEl = item.querySelector('.pli-publisher');
-
-            if (titleEl && priceEl) {
-                const title = titleEl.getAttribute('aria-label').trim();
-                let priceText = priceEl.textContent.trim();
-                
-                // "무료" 항목은 건너뜀
-                if (priceText === '무료') return;
-
-                const price = cleanPrice(priceText);
-                const publisher = publisherEl ? publisherEl.textContent.trim() : "";
-                
-                const appName = getAppName(title, publisher);
-                
-                if (appName && price > 0) {
-                    if (!processedDataByGame[appName]) {
-                        processedDataByGame[appName] = [];
-                    }
-                    processedDataByGame[appName].push({ date, title, price });
-                }
-            }
-        });
-    });
-
-    for (const game in processedDataByGame) {
-        processedDataByGame[game].sort((a, b) => a.date - b.date);
-    }
-    
-    let grandTotal = 0;
-    let topGame = { name: 'N/A', total: 0 };
-    
-    Object.keys(processedDataByGame).forEach(gameName => {
-        const total = processedDataByGame[gameName].reduce((sum, item) => sum + item.price, 0);
-        grandTotal += total;
-        if (total > topGame.total) {
-            topGame = { name: gameName, total: total };
-        }
-    });
-
-    displayOverallSummaries(grandTotal, topGame);
-    populateGameSelector();
-    displayOverallStatsChart(processedDataByGame);
-    setupEventListeners();
-}
 
 
 // --- UI 표시 함수들 ---
@@ -193,8 +83,10 @@ function populateGameSelector() {
     });
 
     if (sortedGames.length === 0) {
-        alert('분석할 결제 내역이 없습니다.');
+        alert('분석할 결제 내역이 없습니다. 무료 항목을 제외하고 유효한 결제가 있는지 확인해주세요.');
         selectorSection.classList.add('hidden');
+        document.getElementById('overall-summary-section').classList.add('hidden');
+        document.getElementById('overall-stats-section').classList.add('hidden');
         return;
     }
 
@@ -217,7 +109,6 @@ function updateDisplayForGame(gameName) {
     const trickcalSummary = document.getElementById('trickcal-specific-summary');
     const trickcalFilters = document.getElementById('trickcal-filter-buttons');
 
-    // '트릭컬 리바이브'일 때만 전용 요약 및 필터 버튼 표시
     if (gameName === '트릭컬 리바이브') {
         trickcalSummary.classList.remove('hidden');
         trickcalFilters.classList.remove('hidden');
@@ -229,6 +120,7 @@ function updateDisplayForGame(gameName) {
         trickcalFilters.classList.add('hidden');
     }
 
+    document.getElementById('summary').classList.remove('hidden');
     document.getElementById('monthly-report').classList.remove('hidden');
     document.getElementById('full-history').classList.remove('hidden');
 
@@ -244,8 +136,14 @@ function updateDisplayForGame(gameName) {
 }
 
 function displaySummary(data) {
-    const totalSpent = data.reduce((sum, item) => sum + item.price, 0);
-    document.getElementById('summary').innerHTML = `<strong>선택된 앱/게임</strong> 총 결제액: <strong>₩${Math.round(totalSpent).toLocaleString()}</strong>`;
+    const summaryDiv = document.getElementById('summary');
+    if (data.length > 0) {
+        const totalSpent = data.reduce((sum, item) => sum + item.price, 0);
+        summaryDiv.innerHTML = `<strong>선택된 앱/게임</strong> 총 결제액: <strong>₩${Math.round(totalSpent).toLocaleString()}</strong>`;
+        summaryDiv.classList.remove('hidden');
+    } else {
+        summaryDiv.classList.add('hidden');
+    }
 }
 
 function displayDailyReport(data) {
@@ -290,8 +188,8 @@ function displayMonthlyReport(data) {
         const items = monthlyTotals[month];
         const totalAmount = items.reduce((sum, item) => sum + item.price, 0);
 
-        let detailsHTML = '<table>';
-        items.forEach(item => {
+        let detailsHTML = '<table><thead><tr><th>날짜</th><th>상품명</th><th>금액</th></tr></thead><tbody>';
+        items.sort((a,b) => a.date - b.date).forEach(item => {
             detailsHTML += `
                 <tr>
                     <td>${item.date.toISOString().split('T')[0]}</td>
@@ -300,7 +198,7 @@ function displayMonthlyReport(data) {
                 </tr>
             `;
         });
-        detailsHTML += '</table>';
+        detailsHTML += '</tbody></table>';
 
         const monthItem = document.createElement('div');
         monthItem.className = 'month-item';
@@ -399,7 +297,7 @@ function displayOverallStatsChart(data) {
     while (currentDate <= maxDate) {
         const year = currentDate.getFullYear();
         const isFirstHalf = currentDate.getMonth() < 6;
-        chartLabels.push(`${year}년 ${isFirstHalf ? '상반기' : '하반기'}`);
+        chartLabels.push(`${year} ${isFirstHalf ? '상반기' : '하반기'}`);
         periodKeys.push(`${year}-${isFirstHalf ? 'H1' : 'H2'}`);
         currentDate.setMonth(currentDate.getMonth() + 6);
     }
@@ -437,7 +335,7 @@ function displayOverallStatsChart(data) {
             label: game.name,
             data: cumulativeData,
             borderColor: color,
-            backgroundColor: color + '33',
+            backgroundColor: color + '33', // for fill area if needed
             fill: false,
             tension: 0.1
         };
@@ -541,4 +439,3 @@ function setupEventListeners() {
         });
     });
 }
-
