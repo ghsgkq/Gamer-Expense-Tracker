@@ -33,4 +33,5 @@
         '신월동행' : ['신월동행', '신월 동행', 'New Moon Companion'],
         '벽람항로' : ['벽람항로', 'Azur Lane'],
         'Arcaea' : ['Arcaea', '아케아'],
+        "Shadowverse: Worlds Beyond": ['Shadowverse', 'Shadowverse: Worlds Beyond', '섀도우버스', '섀도우버스: 월즈 비욘드'],
     };
