@@ -28,24 +28,19 @@ h1, h2 {
     padding-bottom: 10px;
 }
 
-input[type="file"], select {
+input[type="file"], #game-selector {
     margin: 20px 0;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
     width: 100%;
     box-sizing: border-box;
-}
-
-#game-selector-section {
-    margin-bottom: 20px;
+    font-size: 1em;
 }
 
 #game-selector {
     font-weight: bold;
-    font-size: 1.1em;
 }
-
 
 .summary-box {
     background-color: #e8f0fe;
@@ -184,7 +179,7 @@ td:last-child {
 }
 
 #monthly-accordion .month-item.active .month-details {
-    max-height: 500px; /* 펼쳐질 최대 높이, 내용물에 맞게 조절 가능 */
+    max-height: 500px;
     overflow-y: auto;
 }
 
@@ -264,12 +259,8 @@ td:last-child {
 .chart-container {
     position: relative;
     margin: 20px 0;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    background-color: #fdfdfd;
+    height: 400px;
 }
-
 
 .nav-link {
     display: block;
@@ -287,9 +278,7 @@ td:last-child {
     background-color: #e0e0e0;
 }
 
-
 @media (max-width: 600px) {
     .chart-bar-wrapper { min-width: 55px; }
     .chart-bar { width: 30px; }
 }
-
