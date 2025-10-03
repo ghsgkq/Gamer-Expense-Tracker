@@ -38,4 +38,7 @@
         'Pokémon GO': ['Pokémon GO','Pokemon GO', '포켓몬 GO', '포켓몬고', '포켓몬 GO'],
         'Pokémon Sleep': ['Pokémon Sleep','Pokemon Sleep', '포켓몬 Sleep', '포켓몬슬립', '포켓몬 Sleep'],
         '헤븐 번즈 레드' : ['헤븐 번즈 레드', '헤븐번즈레드', 'Heaven Burns Red'],
+        'SD건담 지 제네레이션 이터널' : ['SD건담 지 제네레이션 이터널', 'SD건담지제네레이션이터널', 'SD Gundam G Generation Eternal'],
+        '프로젝트 세카이 컬러풀 스테이지! feat. 하츠네 미쿠' : ['프로젝트 세카이', '프로젝트 세카이 컬러풀 스테이지! feat. 하츠네 미쿠', '프로젝트세카이컬러풀스테이지!feat.하츠네미쿠', 'Project Sekai: Colorful Stage! feat. Hatsune Miku'],
+        '크루세이더 퀘스트' : ['크루세이더 퀘스트', '크루세이더퀘스트', 'Crusaders Quest'],
     };
