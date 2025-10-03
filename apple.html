@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>게이머 가계부 (Apple Store 결제 내역 분석기)</title>
+    <title>게이머 가계부 (Apple Store)</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
@@ -13,10 +14,10 @@
             <a href="google.html">🎮 Google Play</a>
             <a href="apple.html" class="active">🍎 Apple Store</a>
         </header>
-        <h1>🍎 게이머 가계부 (Apple)</h1>
+        <h1>🍎 Apple Store 가계부</h1>
         <p>
-            Apple '문제 신고' 페이지에서 저장한 HTML 파일을 업로드하세요.
-            (<a href="guide/apple_guide.html" target="_blank">파일 다운로드 가이드 보기</a>)
+            Apple '문제 신고' 페이지의 <strong>HTML</strong> 파일을 업로드하여 결제 내역을 분석하세요.
+            (<a href="apple_guide.html" target="_blank">파일 다운로드 가이드 보기</a>)
         </p>
         
         <div class="upload-section">
@@ -28,52 +29,46 @@
         </div>
         <button id="resetButton">초기화</button>
 
-        <!-- 전체 요약 섹션 -->
+        <!-- 분석 결과가 표시될 영역들 -->
         <div id="overall-summary-section" class="hidden">
             <div id="overall-summary" class="summary-box"></div>
-            <div id="top-spender-summary" class="summary-box tertiary"></div>
+            <div id="top-spender-summary" class="summary-box secondary"></div>
         </div>
 
         <!-- 전체 통계 차트 섹션 -->
         <div id="overall-stats-section" class="hidden">
             <h2>📊 전체 결제 통계</h2>
-            <div class="chart-container" style="height:400px;">
+            <div class="chart-container">
                 <canvas id="overall-spending-chart"></canvas>
             </div>
         </div>
 
-        <!-- 게임 선택 섹션 -->
+         <!-- 게임 선택 섹션 -->
         <div id="game-selector-section" class="hidden">
-            <label for="game-selector">분석할 앱/게임 선택:</label>
+            <h2>🔍 앱/게임별 상세 분석</h2>
             <select id="game-selector"></select>
         </div>
-        
-        <!-- 선택된 게임 요약 -->
-        <div id="summary" class="summary-box"></div>
 
-        <!-- 트릭컬 리바이브 전용 요약 (조건부 표시) -->
+        <div id="summary" class="summary-box hidden"></div>
+        <!-- 트릭컬 리바이브 전용 요약 -->
         <div id="trickcal-specific-summary" class="hidden">
             <div id="daily-summary" class="summary-box secondary"></div>
             <div id="pass-summary" class="summary-box tertiary"></div>
             <div id="sashik-pass-summary" class="summary-box quaternary"></div>
         </div>
-
-        <!-- 선택된 게임의 월별 리포트 -->
         <div id="monthly-report" class="hidden">
-            <h2>📅 월별 결제 금액 요약 (클릭하여 내역 보기)</h2>
+            <h2>📅 월별 결제 금액 요약</h2>
             <div id="monthly-accordion"></div>
             <h3 class="chart-title">월별 결제 차트</h3>
             <div id="monthly-chart-container"></div>
         </div>
-
-        <!-- 선택된 게임의 전체 내역 -->
         <div id="full-history" class="hidden">
             <h2>🧾 전체 결제 내역</h2>
             <div id="filter-section">
                 <div id="search-container">
                     <input type="text" id="search-input" placeholder="상품명으로 검색...">
                 </div>
-                 <!-- 트릭컬 리바이브 전용 필터 버튼 -->
+                <!-- 트릭컬 리바이브 전용 필터 -->
                 <div id="trickcal-filter-buttons" class="hidden">
                     <button class="filter-btn active" data-filter="all">전체 보기</button>
                     <button class="filter-btn" data-filter="데일리 왕사탕 공물">데일리 왕사탕</button>
@@ -86,9 +81,10 @@
             <table id="details-table"></table>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <script src="js/appKeywords.js"></script>
     <script src="js/parsers.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
+

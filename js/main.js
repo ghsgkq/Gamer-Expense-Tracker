@@ -25,18 +25,20 @@ function handleFileUpload(event, type) {
         try {
             const fileContent = e.target.result;
             let newData;
+            let statusElementId = type === 'google' ? 'googleFileStatus' : 'appleFileStatus';
+            let statusElement = document.getElementById(statusElementId);
 
             if (type === 'google' && file.name.endsWith('.json')) {
                 const orders = JSON.parse(fileContent);
                 newData = parseGoogleData(orders);
-                document.getElementById('googleFileStatus').textContent = `✅ ${file.name} 로드됨`;
+                if (statusElement) statusElement.textContent = `✅ ${file.name} 로드됨`;
             } else if (type === 'apple' && (file.name.endsWith('.html') || file.name.endsWith('.htm'))) {
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(fileContent, "text/html");
                 newData = parseAppleData(doc);
-                 document.getElementById('appleFileStatus').textContent = `✅ ${file.name} 로드됨`;
+                if (statusElement) statusElement.textContent = `✅ ${file.name} 로드됨`;
             } else {
-                alert('잘못된 파일 형식입니다.');
+                alert('잘못된 파일 형식입니다. .json 또는 .html 파일을 업로드해주세요.');
                 event.target.value = ''; // 파일 선택 초기화
                 return;
             }
@@ -45,7 +47,7 @@ function handleFileUpload(event, type) {
             updateUI();
 
         } catch (error) {
-            alert('파일을 처리하는 중 오류가 발생했습니다.');
+            alert('파일을 처리하는 중 오류가 발생했습니다. 파일 형식이 올바른지 확인해주세요.');
             console.error("파일 처리 오류:", error);
         }
     };
@@ -110,6 +112,8 @@ function displayOverallSummaries(grandTotal, topGame) {
 function populateGameSelector() {
     const selector = document.getElementById('game-selector');
     const selectorSection = document.getElementById('game-selector-section');
+    if (!selector) return; // 페이지에 selector가 없으면 종료
+
     selector.innerHTML = '';
 
     const sortedGames = Object.keys(combinedData).sort((a, b) => {
@@ -122,7 +126,6 @@ function populateGameSelector() {
         selectorSection.classList.add('hidden');
         document.getElementById('overall-summary-section').classList.add('hidden');
         document.getElementById('overall-stats-section').classList.add('hidden');
-        // 분석할 내역이 없다는 알림은 파일 로드 시점에 하는 것이 더 적합
         return;
     }
 
@@ -134,7 +137,6 @@ function populateGameSelector() {
     });
 
     selectorSection.classList.remove('hidden');
-    // 현재 선택된 게임이 목록에 여전히 있는지 확인, 없으면 첫 번째 항목으로 변경
     const currentSelectedGame = selector.value;
     if (!sortedGames.includes(currentSelectedGame)) {
         updateDisplayForGame(sortedGames[0]);
@@ -179,7 +181,9 @@ function updateDisplayForGame(gameName) {
 
 function displaySummary(data) {
     const summaryDiv = document.getElementById('summary');
-    if (data.length > 0) {
+    if (!summaryDiv) return;
+    
+    if (data && data.length > 0) {
         const totalSpent = data.reduce((sum, item) => sum + item.price, 0);
         summaryDiv.innerHTML = `<strong>선택된 앱/게임</strong> 총 결제액: <strong>₩${Math.round(totalSpent).toLocaleString()}</strong>`;
         summaryDiv.classList.remove('hidden');
@@ -230,13 +234,13 @@ function displayMonthlyReport(data) {
         const items = monthlyTotals[month];
         const totalAmount = items.reduce((sum, item) => sum + item.price, 0);
 
-        let detailsHTML = '<table><thead><tr><th>날짜</th><th>상품명</th><th>금액</th></tr></thead><tbody>';
+        let detailsHTML = '<table><tbody>';
         items.sort((a,b) => a.date - b.date).forEach(item => {
             detailsHTML += `
                 <tr>
-                    <td>${item.date.toISOString().split('T')[0]}</td>
-                    <td>${item.title}</td>
-                    <td>₩${item.price.toLocaleString()}</td>
+                    <td data-label="날짜">${item.date.toISOString().split('T')[0]}</td>
+                    <td data-label="상품명">${item.title}</td>
+                    <td data-label="금액">₩${item.price.toLocaleString()}</td>
                 </tr>
             `;
         });
@@ -305,9 +309,9 @@ function displayFullHistory(data) {
         [...data].reverse().forEach(item => {
             tableHTML += `
                 <tr>
-                    <td>${item.date.toISOString().split('T')[0]}</td>
-                    <td>${item.title}</td>
-                    <td>₩${item.price.toLocaleString()}</td>
+                    <td data-label="날짜">${item.date.toISOString().split('T')[0]}</td>
+                    <td data-label="상품명">${item.title}</td>
+                    <td data-label="결제 금액">₩${item.price.toLocaleString()}</td>
                 </tr>
             `;
         });
@@ -317,7 +321,10 @@ function displayFullHistory(data) {
 
 function displayOverallStatsChart(data) {
     const overallStatsSection = document.getElementById('overall-stats-section');
-    const ctx = document.getElementById('overall-spending-chart').getContext('2d');
+    const canvas = document.getElementById('overall-spending-chart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
 
     if (Object.keys(data).length === 0) {
         overallStatsSection.classList.add('hidden');
@@ -377,7 +384,7 @@ function displayOverallStatsChart(data) {
             label: game.name,
             data: cumulativeData,
             borderColor: color,
-            backgroundColor: color + '33', // for fill area if needed
+            backgroundColor: color + '33',
             fill: false,
             tension: 0.1
         };
@@ -501,13 +508,11 @@ function setupEventListeners() {
             }
     
             // UI 초기화
-            document.getElementById('overall-summary-section').classList.add('hidden');
-            document.getElementById('overall-stats-section').classList.add('hidden');
-            document.getElementById('game-selector-section').classList.add('hidden');
-            document.getElementById('summary').classList.add('hidden');
-            document.getElementById('trickcal-specific-summary').classList.add('hidden');
-            document.getElementById('monthly-report').classList.add('hidden');
-            document.getElementById('full-history').classList.add('hidden');
+            document.querySelectorAll('.hidden').forEach(el => el.classList.remove('hidden'));
+            ['overall-summary-section', 'overall-stats-section', 'game-selector-section', 'summary', 'trickcal-specific-summary', 'monthly-report', 'full-history'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
             
             // 파일 입력 필드 및 상태 초기화
             const googleInput = document.getElementById('googleFileInput');
@@ -525,6 +530,18 @@ function setupEventListeners() {
 
 // 초기 로드 시 이벤트 리스너 설정
 document.addEventListener('DOMContentLoaded', () => {
+    // 페이지 경로에 따라 어떤 파일 입력을 활성화할지 결정
+    const path = window.location.pathname.split("/").pop();
+
+    const googleInput = document.getElementById('googleFileInput');
+    const appleInput = document.getElementById('appleFileInput');
+
+    if (path === 'google.html' && appleInput) {
+        appleInput.parentElement.style.display = 'none';
+    } else if (path === 'apple.html' && googleInput) {
+        googleInput.parentElement.style.display = 'none';
+    }
+
     setupFileInputListeners();
     setupEventListeners();
 });
