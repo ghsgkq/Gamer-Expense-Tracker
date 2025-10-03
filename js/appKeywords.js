@@ -12,7 +12,7 @@
         '명일방주': ['명일방주'],
         'Limbus Company': ['Limbus Company', '림버스 컴퍼니', '림버스컴퍼니'],
         '페이트/그랜드 오더': ['페이트/그랜드 오더', '페그오', 'Fate/Grand Order'],
-        '에픽세븐': ['에픽세븐', '에픽 세븐'],
+        '에픽세븐': ['에픽세븐', '에픽 세븐', 'Epic Seven', ,'EpicSeven'],
         '우마무스메 프리티 더비': ['우마무스메', '우마무스메 프리티 더비', '우마무스메: 프리티 더비', '우마무스메프리티더비'],
         '브라운더스트2': ['브라운더스트2', '브라운더스트 2', '브라운더스트II', '브라운더스트 II'],
         '소녀전선2: 망명': ['소녀전선2', '소녀전선 2', '소녀전선2: 망명', '소녀전선2 망명', '소녀전선 망명'],
@@ -34,4 +34,8 @@
         '벽람항로' : ['벽람항로', 'Azur Lane'],
         'Arcaea' : ['Arcaea', '아케아'],
         "Shadowverse: Worlds Beyond": ['Shadowverse', 'Shadowverse: Worlds Beyond', '섀도우버스', '섀도우버스: 월즈 비욘드'],
+        "Monster Hunter Now": ['Monster Hunter Now', '몬스터 헌터 나우', '몬헌 나우', '몬헌나우'],
+        'Pokémon GO': ['Pokémon GO','Pokemon GO', '포켓몬 GO', '포켓몬고', '포켓몬 GO'],
+        'Pokémon Sleep': ['Pokémon Sleep','Pokemon Sleep', '포켓몬 Sleep', '포켓몬슬립', '포켓몬 Sleep'],
+        '헤븐 번즈 레드' : ['헤븐 번즈 레드', '헤븐번즈레드', 'Heaven Burns Red'],
     };
