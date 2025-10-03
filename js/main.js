@@ -3,6 +3,14 @@ let combinedData = {};
 let currentGameData = [];
 let overallChartInstance = null;
 
+// 날짜를 'YYYY-MM-DD' 형식의 문자열로 변환 (현지 시간대 기준)
+function getLocalDateString(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 // 파일 입력 이벤트 리스너 설정
 function setupFileInputListeners() {
     const googleFileInput = document.getElementById('googleFileInput');
@@ -238,7 +246,7 @@ function displayMonthlyReport(data) {
         items.sort((a,b) => a.date - b.date).forEach(item => {
             detailsHTML += `
                 <tr>
-                    <td data-label="날짜">${item.date.toISOString().split('T')[0]}</td>
+                    <td data-label="날짜">${getLocalDateString(item.date)}</td>
                     <td data-label="상품명">${item.title}</td>
                     <td data-label="금액">₩${item.price.toLocaleString()}</td>
                 </tr>
@@ -309,7 +317,7 @@ function displayFullHistory(data) {
         [...data].reverse().forEach(item => {
             tableHTML += `
                 <tr>
-                    <td data-label="날짜">${item.date.toISOString().split('T')[0]}</td>
+                    <td data-label="날짜">${getLocalDateString(item.date)}</td>
                     <td data-label="상품명">${item.title}</td>
                     <td data-label="결제 금액">₩${item.price.toLocaleString()}</td>
                 </tr>
@@ -322,7 +330,7 @@ function displayFullHistory(data) {
 function displayOverallStatsChart(data) {
     const overallStatsSection = document.getElementById('overall-stats-section');
     const canvas = document.getElementById('overall-spending-chart');
-    if (!canvas) return;
+    if (!canvas) return; // 해당 캔버스가 없는 페이지일 수 있음
 
     const ctx = canvas.getContext('2d');
 
