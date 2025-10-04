@@ -370,3 +370,39 @@ td:last-child { text-align: right; font-weight: 500; }
     .chart-bar { width: 30px; }
 }
 
+/* --- Keyword Manager --- */
+#keyword-manager {
+    background-color: #fff;
+    margin: 20px 0;
+}
+.keyword-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.keyword-form input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.keyword-form button {
+    padding: 10px;
+}
+#keywords-list {
+    list-style-type: none;
+    padding: 0;
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 10px;
+    background-color: #fff;
+}
+#keywords-list li {
+    padding: 5px;
+    border-bottom: 1px solid #f0f0f0;
+}
+#keywords-list li:last-child {
+    border-bottom: none;
+}
