@@ -375,6 +375,35 @@ td:last-child { text-align: right; font-weight: 500; }
     background-color: #fff;
     margin: 20px 0;
 }
+#keyword-manager summary {
+    cursor: pointer;
+    padding: 15px 20px;
+    font-weight: bold;
+    list-style: none; /* 기본 화살표 제거 */
+}
+#keyword-manager summary::-webkit-details-marker {
+    display: none; /* Safari에서 화살표 제거 */
+}
+#keyword-manager summary h2 {
+    display: inline;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font-size: 1.2em;
+}
+#keyword-manager summary::before {
+    content: '▶';
+    margin-right: 10px;
+    display: inline-block;
+    transition: transform 0.2s;
+}
+#keyword-manager details[open] > summary::before {
+    transform: rotate(90deg);
+}
+.keyword-content {
+    padding: 0 20px 20px 20px;
+    border-top: 1px solid #eee;
+}
 .keyword-form {
     display: flex;
     flex-direction: column;
@@ -388,6 +417,13 @@ td:last-child { text-align: right; font-weight: 500; }
 }
 .keyword-form button {
     padding: 10px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
 }
 #keywords-list {
     list-style-type: none;
