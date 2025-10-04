@@ -1,4 +1,4 @@
-    const appKeywords = {
+    let appKeywords = {
         '트릭컬 리바이브': ['트릭컬 리바이브', '트릭컬'],
         '명조:워더링 웨이브': ['명조:워더링 웨이브', '명조', 'Wuthering Waves'],
         '가디언 테일즈': ['가디언 테일즈'],

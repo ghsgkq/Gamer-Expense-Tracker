@@ -2,6 +2,8 @@
 let combinedData = {};
 let currentGameData = [];
 let overallChartInstance = null;
+let rawGoogleData = null;
+let rawAppleData = null;
 
 // 날짜를 'YYYY-MM-DD' 형식의 문자열로 변환 (현지 시간대 기준)
 function getLocalDateString(date) {
@@ -37,23 +39,19 @@ function handleFileUpload(event, type) {
             let statusElement = document.getElementById(statusElementId);
 
             if (type === 'google' && file.name.endsWith('.json')) {
-                const orders = JSON.parse(fileContent);
-                newData = parseGoogleData(orders);
+                rawGoogleData = JSON.parse(fileContent);
                 if (statusElement) statusElement.textContent = `✅ ${file.name} 로드됨`;
             } else if (type === 'apple' && (file.name.endsWith('.html') || file.name.endsWith('.htm'))) {
                 const parser = new DOMParser();
-                const doc = parser.parseFromString(fileContent, "text/html");
-                newData = parseAppleData(doc);
+                rawAppleData = parser.parseFromString(fileContent, "text/html");
                 if (statusElement) statusElement.textContent = `✅ ${file.name} 로드됨`;
             } else {
                 alert('잘못된 파일 형식입니다. .json 또는 .html 파일을 업로드해주세요.');
                 event.target.value = ''; // 파일 선택 초기화
                 return;
             }
-
             
-            mergeData(newData);
-            updateUI();
+            reprocessAllData();
 
         } catch (error) {
             alert('파일을 처리하는 중 오류가 발생했습니다. 파일 형식이 올바른지 확인해주세요.');
@@ -61,6 +59,25 @@ function handleFileUpload(event, type) {
         }
     };
     reader.readAsText(file, 'UTF-8');
+}
+
+function reprocessAllData() {
+    combinedData = {}; // 데이터 초기화
+    if (rawGoogleData) {
+        const googleData = parseGoogleData(rawGoogleData);
+        mergeData(googleData);
+    }
+    if (rawAppleData) {
+        const appleData = parseAppleData(rawAppleData);
+        mergeData(appleData);
+    }
+    
+    if (Object.keys(combinedData).length > 0) {
+        document.getElementById('keyword-manager')?.classList.remove('hidden');
+    }
+    
+    updateUI();
+    displayCurrentKeywords();
 }
 
 function mergeData(newData) {
@@ -611,6 +628,8 @@ function setupEventListeners() {
             // 전역 데이터 초기화
             combinedData = {};
             currentGameData = [];
+            rawGoogleData = null;
+            rawAppleData = null;
             if (overallChartInstance) {
                 overallChartInstance.destroy();
                 overallChartInstance = null;
@@ -618,7 +637,7 @@ function setupEventListeners() {
     
             // UI 초기화
             document.querySelectorAll('.hidden').forEach(el => el.classList.remove('hidden'));
-            ['overall-summary-section', 'overall-stats-section', 'game-selector-section', 'summary', 'trickcal-specific-summary', 'monthly-report', 'full-history','currency-section'].forEach(id => {
+            ['overall-summary-section', 'overall-stats-section', 'game-selector-section', 'summary', 'trickcal-specific-summary', 'monthly-report', 'full-history','currency-section', 'keyword-manager'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.add('hidden');
             });
@@ -637,6 +656,55 @@ function setupEventListeners() {
     }
 }
 
+function setupKeywordManagement() {
+    const addKeywordBtn = document.getElementById('add-keyword-btn');
+    const appNameInput = document.getElementById('new-app-name');
+    const keywordsInput = document.getElementById('new-keywords');
+
+    if (!addKeywordBtn) return;
+
+    addKeywordBtn.addEventListener('click', () => {
+        const appName = appNameInput.value.trim();
+        const keywords = keywordsInput.value.trim();
+
+        if (!appName || !keywords) {
+            alert('앱 이름과 키워드를 모두 입력해주세요.');
+            return;
+        }
+
+        const keywordArray = keywords.split(',').map(k => k.trim()).filter(k => k);
+
+        if (!appKeywords[appName]) {
+            appKeywords[appName] = [];
+        }
+
+        keywordArray.forEach(keyword => {
+            if (!appKeywords[appName].includes(keyword)) {
+                appKeywords[appName].push(keyword);
+            }
+        });
+
+        appNameInput.value = '';
+        keywordsInput.value = '';
+
+        reprocessAllData();
+    });
+}
+
+
+function displayCurrentKeywords() {
+    const listElement = document.getElementById('keywords-list');
+    if (!listElement) return;
+
+    listElement.innerHTML = '';
+    for (const appName in appKeywords) {
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>${appName}:</strong> ${appKeywords[appName].join(', ')}`;
+        listElement.appendChild(li);
+    }
+}
+
+
 // 초기 로드 시 이벤트 리스너 설정
 document.addEventListener('DOMContentLoaded', () => {
     // 페이지 경로에 따라 어떤 파일 입력을 활성화할지 결정
@@ -653,5 +721,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setupFileInputListeners();
     setupEventListeners();
+    setupKeywordManagement();
+    displayCurrentKeywords();
 });
 
