@@ -410,10 +410,15 @@ td:last-child { text-align: right; font-weight: 500; }
     gap: 10px;
     margin-bottom: 15px;
 }
-.keyword-form input {
+.keyword-form input, .keyword-search-container input {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+}
+.keyword-search-container {
+    margin-bottom: 15px;
 }
 .keyword-form button {
     padding: 10px;
