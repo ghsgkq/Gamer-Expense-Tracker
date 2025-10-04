@@ -31,15 +31,20 @@
 
         <!-- 키워드 관리 -->
         <div id="keyword-manager" class="hidden">
-            <h2>🎮 키워드 관리</h2>
-            <p>'기타'로 분류된 항목들을 원하는 앱으로 재분류할 수 있습니다. 키워드는 쉼표(,)로 구분해주세요.</p>
-            <div class="keyword-form">
-                <input type="text" id="new-app-name" placeholder="앱 이름 (예: 트릭컬 리바이브)">
-                <input type="text" id="new-keywords" placeholder="키워드 (예: 트릭컬, Trickcal)">
-                <button id="add-keyword-btn">키워드 추가</button>
-            </div>
-            <h3>현재 적용된 키워드</h3>
-            <ul id="keywords-list"></ul>
+            <details>
+                <summary><h2>🎮 키워드 관리 (펼치기/접기)</h2></summary>
+                <div class="keyword-content">
+                    <p>'기타'로 분류된 항목들을 원하는 앱으로 재분류할 수 있습니다. 키워드는 쉼표(,)로 구분해주세요.</p>
+                    <div class="keyword-form">
+                        <input type="text" id="new-app-name" placeholder="앱 이름 (예: 트릭컬 리바이브)">
+                        <input type="text" id="new-keywords" placeholder="키워드 (예: 트릭컬, Trickcal)">
+                        <button id="add-keyword-btn">키워드 추가</button>
+                    </div>
+                    <h3>현재 적용된 키워드</h3>
+                    <ul id="keywords-list"></ul>
+                </div>
+
+            </details>
         </div>
 
 
