@@ -50,6 +50,7 @@ function handleFileUpload(event, type) {
                 event.target.value = ''; // 파일 선택 초기화
                 return;
             }
+
             
             mergeData(newData);
             updateUI();
@@ -85,32 +86,71 @@ function mergeData(newData) {
 }
 
 function updateUI() {
-    let grandTotal = 0;
-    let topGame = { name: 'N/A', total: 0 };
-    Object.keys(combinedData).forEach(gameName => {
-        const total = combinedData[gameName].reduce((sum, item) => sum + item.price, 0);
-        grandTotal += total;
-        if (total > topGame.total) {
-            topGame = { name: gameName, total: total };
-        }
-    });
-
-    displayOverallSummaries(grandTotal, topGame);
+    displayCurrencyOptions();
+    displayOverallSummaries();
     populateGameSelector();
     displayOverallStatsChart(combinedData);
 }
 
+function calculateTotals(data){
+    const totals = {}; // e.g., { '₩': 10000, '$': 50 }
+    data.forEach(item => {
+        if (!totals[item.currency]) {
+            totals[item.currency] = 0;
+        }
+        totals[item.currency] += parseFloat(item.price);
+    });
+    return totals;
+}
+
+function formatTotals(totals, currencyFilter) {
+    // totals 객체가 비어있을 경우
+    if (Object.keys(totals).length === 0) {
+        return `<strong>${currencyFilter || '₩'}0</strong>`;
+    }
+
+    // currencyFilter가 있고, 해당하는 데이터가 있을 경우
+    if (currencyFilter && totals[currencyFilter] !== undefined) {
+        const amount = totals[currencyFilter];
+
+        // toLocaleString()은 소수점이 있으면 알아서 포함하고, 없으면 정수로 표시합니다.
+        // 또한 세 자리마다 콤마(,)도 자동으로 추가해 줍니다.
+        const formattedAmount = amount.toLocaleString();
+
+        return `<strong>${currencyFilter}${formattedAmount}</strong>`;
+    }
+
+    // 해당하는 통화 데이터가 없으면 빈 문자열 반환
+    return '';
+}
 
 // --- UI 표시 함수들 ---
 
-function displayOverallSummaries(grandTotal, topGame) {
+function displayOverallSummaries() {
     const overallSummarySection = document.getElementById('overall-summary-section');
     const overallSummaryDiv = document.getElementById('overall-summary');
     const topSpenderDiv = document.getElementById('top-spender-summary');
+    // 선택한 화폐 단위
+    const currency = document.getElementById('currency-select').value;
 
-    if (grandTotal > 0) {
-        overallSummaryDiv.innerHTML = `💸 모든 앱/게임 총 결제액: <strong>₩${Math.round(grandTotal).toLocaleString()}</strong>`;
-        topSpenderDiv.innerHTML = `👑 가장 많이 결제한 앱/게임: <strong>${topGame.name}</strong> (₩${Math.round(topGame.total).toLocaleString()})`;
+    const allItems = Object.values(combinedData).flat();
+    const grandTotals = calculateTotals(allItems);
+    
+    let topGame = { name: 'N/A', totals: {} };
+    let maxKrwEquivalent = 0;
+
+    Object.keys(combinedData).forEach(gameName => {
+        const gameTotals = calculateTotals(combinedData[gameName]);
+        const krwTotal = gameTotals[currency] || 0;
+        if (krwTotal > maxKrwEquivalent) {
+            maxKrwEquivalent = krwTotal;
+            topGame = { name: gameName, totals: gameTotals };
+        }
+    });
+
+    if (Object.keys(grandTotals).length > 0) {
+        overallSummaryDiv.innerHTML = `💸 모든 앱/게임 총 결제액: ${formatTotals(grandTotals, currency)}`;
+        topSpenderDiv.innerHTML = `👑 가장 많이 결제한 앱/게임: <strong>${topGame.name}</strong> (${formatTotals(topGame.totals, currency)})`;
         overallSummarySection.classList.remove('hidden');
     } else {
         overallSummarySection.classList.add('hidden');
@@ -120,11 +160,16 @@ function displayOverallSummaries(grandTotal, topGame) {
 function populateGameSelector() {
     const selector = document.getElementById('game-selector');
     const selectorSection = document.getElementById('game-selector-section');
+    const currency = document.getElementById('currency-select').value;
+
     if (!selector) return; // 페이지에 selector가 없으면 종료
 
     selector.innerHTML = '';
 
-    const sortedGames = Object.keys(combinedData).sort((a, b) => {
+
+    const sortedGames = Object.keys(combinedData).filter(gameName =>
+        combinedData[gameName].some(item => item.currency === currency)
+    ).sort((a, b) => {
         const totalA = combinedData[a].reduce((sum, item) => sum + item.price, 0);
         const totalB = combinedData[b].reduce((sum, item) => sum + item.price, 0);
         return totalB - totalA;
@@ -154,9 +199,10 @@ function populateGameSelector() {
 }
 
 function updateDisplayForGame(gameName) {
+    const currency = document.getElementById('currency-select').value;
     currentGameData = combinedData[gameName] || [];
     
-    displaySummary(currentGameData);
+    displaySummary(currentGameData, currency);
     
     const trickcalSummary = document.getElementById('trickcal-specific-summary');
     const trickcalFilters = document.getElementById('trickcal-filter-buttons');
@@ -176,8 +222,8 @@ function updateDisplayForGame(gameName) {
     document.getElementById('monthly-report').classList.remove('hidden');
     document.getElementById('full-history').classList.remove('hidden');
 
-    displayMonthlyReport(currentGameData);
-    displayFullHistory(currentGameData);
+    displayMonthlyReport(currentGameData , currency);
+    displayFullHistory(currentGameData, currency);
     
     document.getElementById('search-input').value = '';
     const allButton = document.querySelector('#trickcal-filter-buttons .filter-btn[data-filter="all"]');
@@ -187,13 +233,15 @@ function updateDisplayForGame(gameName) {
     }
 }
 
-function displaySummary(data) {
+function displaySummary(data,currency) {
     const summaryDiv = document.getElementById('summary');
     if (!summaryDiv) return;
     
     if (data && data.length > 0) {
-        const totalSpent = data.reduce((sum, item) => sum + item.price, 0);
-        summaryDiv.innerHTML = `<strong>선택된 앱/게임</strong> 총 결제액: <strong>₩${Math.round(totalSpent).toLocaleString()}</strong>`;
+        const totalSpent = data
+        .filter(item => item.currency === currency)
+        .reduce((sum, item) => sum + item.price, 0);
+        summaryDiv.innerHTML = `<strong>선택된 앱/게임</strong> 총 결제액: <strong>${currency}${totalSpent.toLocaleString()}</strong>`;
         summaryDiv.classList.remove('hidden');
     } else {
         summaryDiv.classList.add('hidden');
@@ -223,14 +271,15 @@ function displaySashikPassReport(data) {
     document.getElementById('sashik-pass-summary').innerHTML = `사복 패스 총 결제액: <strong>₩${sashikTotal.toLocaleString()}</strong>`;
 }
 
-function displayMonthlyReport(data) {
+function displayMonthlyReport(data, currency) {
     const monthlyTotals = {};
-    data.forEach(item => {
-        const month = item.date.getFullYear() + '-' + String(item.date.getMonth() + 1).padStart(2, '0');
-        if (!monthlyTotals[month]) {
-            monthlyTotals[month] = [];
-        }
-        monthlyTotals[month].push(item);
+    data.filter(item => item.currency === currency)
+        .forEach(item => {
+            const month = item.date.getFullYear() + '-' + String(item.date.getMonth() + 1).padStart(2, '0');
+            if (!monthlyTotals[month]) {
+                monthlyTotals[month] = [];
+            }
+            monthlyTotals[month].push(item);
     });
 
     const accordionContainer = document.getElementById('monthly-accordion');
@@ -248,7 +297,7 @@ function displayMonthlyReport(data) {
                 <tr>
                     <td data-label="날짜">${getLocalDateString(item.date)}</td>
                     <td data-label="상품명">${item.title}</td>
-                    <td data-label="금액">₩${item.price.toLocaleString()}</td>
+                    <td data-label="금액">${currency}${item.price.toLocaleString()}</td>
                 </tr>
             `;
         });
@@ -259,7 +308,7 @@ function displayMonthlyReport(data) {
         monthItem.innerHTML = `
             <div class="month-summary">
                 <span>${month}</span>
-                <span>₩${Math.round(totalAmount).toLocaleString()}</span>
+                <span>${currency}${totalAmount.toLocaleString()}</span>
             </div>
             <div class="month-details">${detailsHTML}</div>
         `;
@@ -299,8 +348,8 @@ function displayMonthlyChart(monthlyData) {
 
         chartHTML += `
             <div class="chart-bar-wrapper"> 
-                <div class="chart-amount">₩${Math.round(amount).toLocaleString()}</div>
-                <div class="chart-bar" style="height: ${barHeight}%;" title="${month}: ₩${Math.round(amount).toLocaleString()}"></div>
+                <div class="chart-amount">₩${amount.toLocaleString()}</div>
+                <div class="chart-bar" style="height: ${barHeight}%;" title="${month}: ₩${amount.toLocaleString()}"></div>
                 <div class="chart-label">${label}</div>
             </div>
         `;
@@ -308,28 +357,55 @@ function displayMonthlyChart(monthlyData) {
     chartContainer.innerHTML = chartHTML;
 }
 
-function displayFullHistory(data) {
+function displayFullHistory(data, currency) {
     const table = document.getElementById('details-table');
     let tableHTML = `<thead><tr><th>날짜</th><th>상품명</th><th>결제 금액</th></tr></thead><tbody>`;
     if (data.length === 0) {
         tableHTML += `<tr><td colspan="3" style="text-align:center;">표시할 내역이 없습니다.</td></tr>`;
     } else {
-        [...data].reverse().forEach(item => {
-            tableHTML += `
-                <tr>
-                    <td data-label="날짜">${getLocalDateString(item.date)}</td>
-                    <td data-label="상품명">${item.title}</td>
-                    <td data-label="결제 금액">₩${item.price.toLocaleString()}</td>
-                </tr>
-            `;
+        [...data].reverse()
+                 .filter(item => item.currency === currency)
+                 .forEach(item => {
+                    tableHTML += `
+                        <tr>
+                            <td data-label="날짜">${getLocalDateString(item.date)}</td>
+                            <td data-label="상품명">${item.title}</td>
+                            <td data-label="결제 금액">${currency}${item.price.toLocaleString()}</td>
+                        </tr>
+                    `;
         });
     }
     table.innerHTML = tableHTML + `</tbody>`;
 }
 
+// 화폐 단위 선택 옵션 표시
+function displayCurrencyOptions() {
+    const currencySelect = document.getElementById('currency-section');
+    if (!currencySelect) return;
+
+    const allItems = Object.values(combinedData).flat();
+    const uniqueCurrencies = [...new Set(allItems.map(item => item.currency))];
+    const select = document.getElementById('currency-select');
+    select.innerHTML = '';
+
+    uniqueCurrencies.forEach(currency => {
+        const option = document.createElement('option');
+        option.value = currency;
+        option.textContent = currency;
+        select.appendChild(option);
+    });
+    if (uniqueCurrencies.length === 0) {
+        currencySelect.classList.add('hidden');
+        return;
+    }
+
+    currencySelect.classList.remove('hidden');
+}
+
 function displayOverallStatsChart(data) {
     const overallStatsSection = document.getElementById('overall-stats-section');
     const canvas = document.getElementById('overall-spending-chart');
+    const currency = document.getElementById('currency-select').value;
     if (!canvas) return; // 해당 캔버스가 없는 페이지일 수 있음
 
     const ctx = canvas.getContext('2d');
@@ -342,7 +418,15 @@ function displayOverallStatsChart(data) {
 
     let minDate = new Date();
     let maxDate = new Date(1970, 0, 1);
-    Object.values(data).flat().forEach(item => {
+    const allItems = Object.values(data).flat().filter(item => item.currency === currency);
+     
+    if(allItems.length === 0) {
+        if (overallChartInstance) overallChartInstance.destroy();
+         overallStatsSection.classList.add('hidden');
+        return;
+    }
+
+    allItems.forEach(item => {
         if (item.date < minDate) minDate = item.date;
         if (item.date > maxDate) maxDate = item.date;
     });
@@ -361,15 +445,16 @@ function displayOverallStatsChart(data) {
 
     const gameTotals = Object.keys(data).map(gameName => ({
         name: gameName,
-        total: data[gameName].reduce((sum, item) => sum + item.price, 0)
-    }));
+        total: data[gameName].filter(d => d.currency === currency).reduce((sum, item) => sum + item.price, 0)
+    })).filter(g => g.total > 0);
+
     const topGames = gameTotals.sort((a, b) => b.total - a.total).slice(0, 7);
 
     const datasets = topGames.map((game, index) => {
         const periodTotals = {};
         periodKeys.forEach(key => periodTotals[key] = 0);
 
-        data[game.name].forEach(item => {
+        data[game.name].filter(d => d.currency === currency).forEach(item => {
             const year = item.date.getFullYear();
             const isFirstHalf = item.date.getMonth() < 6;
             const key = `${year}-${isFirstHalf ? 'H1' : 'H2'}`;
@@ -413,7 +498,7 @@ function displayOverallStatsChart(data) {
             plugins: {
                 title: {
                     display: true,
-                    text: '누적 결제액 상위 게임 추이 (6개월 단위)'
+                    text: '누적 결제액 상위 게임 추이 ('+currency+' 기준, 6개월 단위)'
                 },
                 tooltip: {
                     mode: 'index',
@@ -423,7 +508,7 @@ function displayOverallStatsChart(data) {
                             let label = context.dataset.label || '';
                             if (label) label += ': ';
                             if (context.parsed.y !== null) {
-                                label += '₩' + Math.round(context.parsed.y).toLocaleString();
+                                label += currency + context.parsed.y.toLocaleString();
                             }
                             return label;
                         }
@@ -435,10 +520,10 @@ function displayOverallStatsChart(data) {
                     title: { display: true, text: '기간' }
                 },
                 y: {
-                    title: { display: true, text: '누적 결제액 (₩)' },
+                    title: { display: true, text: '누적 결제액 (' + currency + ')' },
                     ticks: {
                         callback: function(value) {
-                            return '₩' + value.toLocaleString();
+                            return currency + value.toLocaleString();
                         }
                     }
                 }
@@ -449,11 +534,27 @@ function displayOverallStatsChart(data) {
 
 function setupEventListeners() {
     const gameSelector = document.getElementById('game-selector');
+    const currencySelect = document.getElementById('currency-select');
     if(gameSelector){
         gameSelector.addEventListener('change', (e) => {
             updateDisplayForGame(e.target.value);
         });
     }
+    if(currencySelect){
+        currencySelect.addEventListener('change', () => {
+            if (gameSelector) {
+                displayOverallSummaries();
+                if (overallChartInstance) {
+                    overallChartInstance.destroy();
+                    overallChartInstance = null;
+                }
+                displayOverallStatsChart(combinedData);
+                populateGameSelector();
+                updateDisplayForGame(gameSelector.value);
+            }
+        });
+    }
+
 
     const searchInput = document.getElementById('search-input');
     if(searchInput) {
@@ -517,7 +618,7 @@ function setupEventListeners() {
     
             // UI 초기화
             document.querySelectorAll('.hidden').forEach(el => el.classList.remove('hidden'));
-            ['overall-summary-section', 'overall-stats-section', 'game-selector-section', 'summary', 'trickcal-specific-summary', 'monthly-report', 'full-history'].forEach(id => {
+            ['overall-summary-section', 'overall-stats-section', 'game-selector-section', 'summary', 'trickcal-specific-summary', 'monthly-report', 'full-history','currency-section'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.add('hidden');
             });
