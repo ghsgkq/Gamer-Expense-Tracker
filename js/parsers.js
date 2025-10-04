@@ -8,12 +8,6 @@ function parseKoreanDate(dateStr) {
     return new Date(parts[1], parts[2] - 1, parts[3]);
 }
 
-// 가격 문자열에서 숫자만 추출합니다.
-function cleanPrice(priceStr) {
-    if (typeof priceStr !== 'string') return 0;
-    return parseInt(priceStr.replace(/[^0-9]/g, ''), 10) || 0;
-}
-
 // 상품명과 퍼블리셔 정보를 바탕으로 표준화된 앱/게임 이름을 반환합니다.
 function getAppName(title, publisher) {
     const combinedInfo = `${title} ${publisher}`;
@@ -29,6 +23,20 @@ function getAppName(title, publisher) {
 }
 
 
+function parsePrice(priceStr){
+    if (typeof priceStr !== 'string' || priceStr.trim() === ''){
+        return { amount: 0, currency: '₩' }; // 기본 통화는 원화로 설정
+    }
+
+    // 통화 기호를 추출 (예: ₩, $, €, ¥ 등)
+    const currencySymbolMatch = priceStr.match(/[₩$¥€]/);
+    const currency = currencySymbolMatch ? currencySymbolMatch[0] : '₩'; // 기본 통화는 원화
+
+    // 소수점을 포함할 수 있으므로 parseFloat 사용
+    const amount = parseFloat(priceStr.replace(/[^0-9.]/g, '')) || 0;
+
+    return { amount, currency };
+}
 // --- 플랫폼별 파서 ---
 
 /**
@@ -41,13 +49,12 @@ function parseGoogleData(orders) {
     orders.forEach(item => {
         const order = item.orderHistory;
         if (!order || !order.lineItem || order.lineItem.length === 0) return;
+        
+        const priceInfo = parsePrice(order.totalPrice);
+        const refundInfo = parsePrice(order.refundAmount);
 
-        const priceText = order.totalPrice;
-        if (priceText === '₩0') return;
-
-        const price = cleanPrice(priceText);
-        const refund = cleanPrice(order.refundAmount);
-        const netPrice = price - refund;
+        // 환불 금액이 있으면 순 가격에서 차감
+        const netPrice = priceInfo.amount - refundInfo.amount;
 
         if (netPrice <= 0) return;
         
@@ -56,9 +63,6 @@ function parseGoogleData(orders) {
         // 시간대 문제를 해결하기 위한 수정:
         // UTC 기준 시간(ISO String)으로 Date 객체를 먼저 생성합니다.
         const utcDate = new Date(order.creationTime);
-        // 생성된 객체에서 현지 시간대 기준의 년/월/일을 추출하여, 
-        // 시간 정보가 없는 새로운 Date 객체를 생성합니다.
-        // 이렇게 하면 모든 날짜 계산이 현지 시간대 기준으로 통일됩니다.
         const date = new Date(utcDate.getFullYear(), utcDate.getMonth(), utcDate.getDate());
 
         const appName = getAppName(title, title);
@@ -66,7 +70,7 @@ function parseGoogleData(orders) {
         if (!processedData[appName]) {
             processedData[appName] = [];
         }
-        processedData[appName].push({ date, title, price: netPrice });
+        processedData[appName].push({ date, title, price: netPrice, currency: priceInfo.currency });
     });
     return processedData;
 }
@@ -100,16 +104,16 @@ function parseAppleData(doc) {
                 
                 if (priceText === '무료' || !priceText) return;
 
-                const price = cleanPrice(priceText);
+                const priceInfo = parsePrice(priceText);
                 const publisher = publisherEl ? publisherEl.textContent.trim() : "";
                 
                 const appName = getAppName(title, publisher);
                 
-                if (appName && price > 0) {
+                if (appName && priceInfo.amount > 0) {
                     if (!processedData[appName]) {
                         processedData[appName] = [];
                     }
-                    processedData[appName].push({ date, title, price });
+                    processedData[appName].push({ date, title, price: priceInfo.amount, currency: priceInfo.currency });
                 }
             }
         });
