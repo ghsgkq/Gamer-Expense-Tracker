@@ -661,6 +661,7 @@ function setupKeywordManagement() {
     const appNameInput = document.getElementById('new-app-name');
     const keywordsInput = document.getElementById('new-keywords');
     const keywordsList = document.getElementById('keywords-list');
+    const keywordSearchInput = document.getElementById('keyword-search-input');
 
     if (!addKeywordBtn) return;
 
@@ -713,15 +714,26 @@ function setupKeywordManagement() {
             reprocessAllData();
         }
     });
+
+    keywordSearchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        displayCurrentKeywords(searchTerm);
+    });
 }
 
-
-function displayCurrentKeywords() {
+function displayCurrentKeywords(searchTerm = '') {
     const listElement = document.getElementById('keywords-list');
     if (!listElement) return;
 
     listElement.innerHTML = '';
-    for (const appName in appKeywords) {
+    
+    const filteredKeywords = Object.keys(appKeywords).filter(appName => {
+        if (searchTerm === '') return true;
+        const keywords = appKeywords[appName].join(', ').toLowerCase();
+        return appName.toLowerCase().includes(searchTerm) || keywords.includes(searchTerm);
+    });
+
+    filteredKeywords.forEach(appName => {
         const appLi = document.createElement('li');
         appLi.innerHTML = `<strong>${appName}</strong>`;
         
@@ -756,7 +768,7 @@ function displayCurrentKeywords() {
         });
         keywordsLi.appendChild(keywordsSpan);
         listElement.appendChild(keywordsLi);
-    }
+    });
 }
 
 
