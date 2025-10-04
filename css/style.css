@@ -428,7 +428,7 @@ td:last-child { text-align: right; font-weight: 500; }
 #keywords-list {
     list-style-type: none;
     padding: 0;
-    max-height: 150px;
+    max-height: 500px;
     overflow-y: auto;
     border: 1px solid #eee;
     border-radius: 4px;
@@ -441,4 +441,43 @@ td:last-child { text-align: right; font-weight: 500; }
 }
 #keywords-list li:last-child {
     border-bottom: none;
+}
+.keyword-tag {
+    display: inline-flex;
+    align-items: center;
+    background-color: #ecf0f1;
+    border-radius: 12px;
+    padding: 3px 8px;
+    margin: 3px;
+    font-size: 0.9em;
+}
+
+.delete-keyword-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.8em;
+    cursor: pointer;
+    margin-left: 10px;
+}
+.delete-keyword-btn.app-delete {
+    background-color: #c0392b;
+}
+.delete-keyword-btn:hover {
+    opacity: 0.8;
+}
+
+.keyword-tag .delete-keyword-btn {
+    padding: 0;
+    background: none;
+    color: #95a5a6;
+    font-size: 1.2em;
+    line-height: 1;
+    margin-left: 5px;
+    font-weight: bold;
+}
+.keyword-tag .delete-keyword-btn:hover {
+    color: #e74c3c;
 }
