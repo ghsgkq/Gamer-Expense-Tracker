@@ -660,6 +660,7 @@ function setupKeywordManagement() {
     const addKeywordBtn = document.getElementById('add-keyword-btn');
     const appNameInput = document.getElementById('new-app-name');
     const keywordsInput = document.getElementById('new-keywords');
+    const keywordsList = document.getElementById('keywords-list');
 
     if (!addKeywordBtn) return;
 
@@ -689,6 +690,29 @@ function setupKeywordManagement() {
 
         reprocessAllData();
     });
+
+    keywordsList.addEventListener('click', (event) => {
+        const target = event.target;
+        if (target.classList.contains('delete-keyword-btn')) {
+            const appName = target.dataset.appName;
+            const keyword = target.dataset.keyword;
+
+            if (keyword) { // 개별 키워드 삭제
+                const keywords = appKeywords[appName];
+                const index = keywords.indexOf(keyword);
+                if (index > -1) {
+                    keywords.splice(index, 1);
+                }
+                if (keywords.length === 0) {
+                    delete appKeywords[appName];
+                }
+            } else { // 앱 이름 전체 삭제
+                delete appKeywords[appName];
+            }
+            
+            reprocessAllData();
+        }
+    });
 }
 
 
@@ -698,9 +722,40 @@ function displayCurrentKeywords() {
 
     listElement.innerHTML = '';
     for (const appName in appKeywords) {
-        const li = document.createElement('li');
-        li.innerHTML = `<strong>${appName}:</strong> ${appKeywords[appName].join(', ')}`;
-        listElement.appendChild(li);
+        const appLi = document.createElement('li');
+        appLi.innerHTML = `<strong>${appName}</strong>`;
+        
+        const appDeleteBtn = document.createElement('button');
+        appDeleteBtn.textContent = '앱 전체 삭제';
+        appDeleteBtn.className = 'delete-keyword-btn app-delete';
+        appDeleteBtn.dataset.appName = appName;
+        appLi.appendChild(appDeleteBtn);
+        listElement.appendChild(appLi);
+
+        const keywordsLi = document.createElement('li');
+        const keywordsSpan = document.createElement('span');
+        keywordsSpan.style.wordBreak = 'break-all';
+
+        appKeywords[appName].forEach(keyword => {
+            const keywordContainer = document.createElement('span');
+            keywordContainer.className = 'keyword-tag';
+            
+            const keywordSpan = document.createElement('span');
+            keywordSpan.textContent = keyword;
+            
+            const keywordDeleteBtn = document.createElement('button');
+            keywordDeleteBtn.textContent = 'x';
+            keywordDeleteBtn.className = 'delete-keyword-btn';
+            keywordDeleteBtn.dataset.appName = appName;
+            keywordDeleteBtn.dataset.keyword = keyword;
+            keywordDeleteBtn.title = `'${keyword}' 키워드 삭제`;
+            
+            keywordContainer.appendChild(keywordSpan);
+            keywordContainer.appendChild(keywordDeleteBtn);
+            keywordsSpan.appendChild(keywordContainer);
+        });
+        keywordsLi.appendChild(keywordsSpan);
+        listElement.appendChild(keywordsLi);
     }
 }
 
