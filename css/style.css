@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+@import url('https://cdn.jsdelivr.net/npm/galmuri/dist/galmuri.css');
 
 body {
-    font-family: 'Noto Sans KR', sans-serif;
+    font-family: 'Galmuri11', sans-serif;
     background-color: #f4f4f9;
     color: #333;
     margin: 0;
