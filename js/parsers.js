@@ -1,10 +1,8 @@
 // --- 공용 헬퍼 함수 ---
-
 // 'YYYY년 MM월 DD일' 형식의 날짜 문자열을 Date 객체로 변환합니다.
 function parseKoreanDate(dateStr) {
     const parts = dateStr.match(/(\d{4})년 (\d{1,2})월 (\d{1,2})일/);
     if (!parts) return null;
-    // 시간 정보가 없으므로 현지 시간대 자정을 기준으로 Date 객체를 생성합니다.
     return new Date(parts[1], parts[2] - 1, parts[3]);
 }
 
@@ -22,27 +20,23 @@ function getAppName(title, publisher) {
     return '기타';
 }
 
-
 function parsePrice(priceStr){
     if (typeof priceStr !== 'string' || priceStr.trim() === ''){
-        return { amount: 0, currency: '₩' }; // 기본 통화는 원화로 설정
+        return { amount: 0, currency: '₩' }; 
     }
 
-    // 통화 기호를 추출 (예: ₩, $, €, ¥ 등)
     const currencySymbolMatch = priceStr.match(/[₩$¥€]/);
-    const currency = currencySymbolMatch ? currencySymbolMatch[0] : '₩'; // 기본 통화는 원화
+    const currency = currencySymbolMatch ? currencySymbolMatch[0] : '₩'; 
 
-    // 소수점을 포함할 수 있으므로 parseFloat 사용
     const amount = parseFloat(priceStr.replace(/[^0-9.]/g, '')) || 0;
 
     return { amount, currency };
 }
+
 // --- 플랫폼별 파서 ---
 
 /**
  * Google 결제 내역(JSON)을 파싱하여 표준화된 데이터 객체를 반환합니다.
- * Order History.json 파일의 내용
- * 게임/앱별로 그룹화된 결제 데이터 객체
  */
 function parseGoogleData(orders) {
     const processedData = {};
@@ -60,10 +54,15 @@ function parseGoogleData(orders) {
         
         const title = order.lineItem[0].doc.title || "";
         
-        // 시간대 문제를 해결하기 위한 수정:
-        // UTC 기준 시간(ISO String)으로 Date 객체를 먼저 생성합니다.
+        // [수정됨] UTC 시간을 한국 시간(KST, UTC+9) 기준으로 명확하게 변환
+        // 브라우저의 로컬 시간대에 상관없이 한국 날짜로 고정합니다.
         const utcDate = new Date(order.creationTime);
-        const date = new Date(utcDate.getFullYear(), utcDate.getMonth(), utcDate.getDate());
+        const kstOffset = 9 * 60 * 60 * 1000; // 9시간 (밀리초)
+        const kstDate = new Date(utcDate.getTime() + kstOffset);
+        
+        // KST 기준의 년, 월, 일을 사용하여 Date 객체 생성 (시간은 00:00:00)
+        // getUTCFullYear() 등을 사용하여 변환된 타임스탬프의 UTC 값을 가져오면 KST 날짜가 됨
+        const date = new Date(kstDate.getUTCFullYear(), kstDate.getUTCMonth(), kstDate.getUTCDate());
 
         const appName = getAppName(title, title);
         
@@ -77,8 +76,6 @@ function parseGoogleData(orders) {
 
 /**
  * Apple 결제 내역(HTML)을 파싱하여 표준화된 데이터 객체를 반환합니다.
- *  doc - '문제 신고.html' 파일을 파싱한 HTML Document
- *  게임/앱별로 그룹화된 결제 데이터 객체
  */
 function parseAppleData(doc) {
     const processedData = {};
