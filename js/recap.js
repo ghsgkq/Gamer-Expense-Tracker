@@ -336,7 +336,7 @@ function getSashikImageHTML(title, isCard = false) {
 // 고급 패스 뱃지 HTML
 function getPremiumBadgeHTML(year, month) {
     const monthStr = String(month).padStart(2, '0');
-    const gifMonths = [1, 10, 11, 12];
+    const gifMonths = [1, 9, 10, 11, 12];
     const isGif = gifMonths.includes(month);
     const ext = isGif ? 'gif' : 'mp4';
     const fileName = `${year}${monthStr}pass.${ext}`;
