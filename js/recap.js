@@ -92,12 +92,7 @@ function mergeData(newData) {
     for (const gameName in newData) {
         if (!combinedData[gameName]) combinedData[gameName] = [];
         newData[gameName].forEach(newItem => {
-            const isDuplicate = combinedData[gameName].some(existing => 
-                existing.date.getTime() === newItem.date.getTime() && 
-                existing.title === newItem.title && 
-                existing.price === newItem.price
-            );
-            if (!isDuplicate) combinedData[gameName].push(newItem);
+            combinedData[gameName].push(newItem);
         });
     }
 }
@@ -211,7 +206,7 @@ function startRecapSequence() {
             <div class="slide-content fade-in-up">
                 <h2>${year}년 트릭컬 리바이브</h2>
                 <h1 class="highlight-text">교주님의 헌신</h1>
-                <p>대표님이 교주님의 지갑을 기억합니다.</p>
+                <p>에르핀이 교주님의 지갑을 기억합니다.</p>
             </div>
         `
     });
@@ -267,7 +262,7 @@ function startRecapSequence() {
         });
     }
 
-    // 7. [수정됨] 월별 상세 타임라인 (저장 버튼 기능 포함)
+    // 7. 월별 상세 타임라인 (저장 버튼 기능 포함)
     recapSlides.push({
         type: 'monthly_timeline',
         title: '🗓️ 월별 공물 납부 내역',
@@ -463,6 +458,7 @@ function showSlide(index) {
             }
         }
         html = generateReceiptHTML(slide.title, rows, total, true);
+        html += `<button class="save-img-btn" style="margin-top:15px; background-color:#fab1a0;" onclick="downloadLongReceipt()">📸 이미지로 저장</button>`;
     }
     else if (slide.type === 'max_month_receipt') {
         let rows = '';
@@ -577,7 +573,7 @@ window.downloadLongReceipt = function() {
         }
     }
 
-    // [수정] 영수증 하단에 EPID Games 저작권 명시 추가
+    // 영수증 하단에 EPID Games 저작권 명시 추가
     const receiptHTML = `
         <div id="temp-capture-area" style="position:fixed; top:-9999px; left:0; width: 400px; background-color:#2d3436; padding: 20px; font-family: 'Galmuri11', sans-serif;">
             <div class="receipt-paper" style="box-shadow:none; margin:0 auto; transform:none;">
