@@ -486,3 +486,419 @@ td:last-child { text-align: right; font-weight: 500; }
 .keyword-tag .delete-keyword-btn:hover {
     color: #e74c3c;
 }
+
+/* --- Recap Page Specific Styles --- */
+.recap-intro {
+    text-align: center;
+    padding: 40px 20px;
+}
+.recap-intro h1 { font-size: 2.2em; color: #6c5ce7; border-bottom: none; }
+.intro-text { font-size: 1.1em; margin-bottom: 30px; color: #555; }
+
+.year-select-wrapper { margin: 20px 0; font-size: 1.2em; }
+.year-select-wrapper select {
+    padding: 8px 15px; font-size: 1em; border-radius: 8px; border: 2px solid #6c5ce7;
+}
+
+.start-btn {
+    background-color: #b2bec3;
+    color: white;
+    font-size: 1.2em;
+    padding: 15px 40px;
+    border: none;
+    border-radius: 50px;
+    cursor: not-allowed;
+    margin-top: 30px;
+    transition: all 0.3s ease;
+}
+.start-btn.ready {
+    background-color: #6c5ce7;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+    animation: pulse-btn 2s infinite;
+}
+@keyframes pulse-btn {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* --- Recap Overlay & Animation --- */
+#recap-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at center, #2d3436 0%, #000000 100%);
+    z-index: 9999;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#close-recap-btn {
+    position: absolute; top: 20px; right: 20px;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid white; color: white;
+    padding: 5px 15px; border-radius: 20px; cursor: pointer;
+}
+
+.slide-content { text-align: center; width: 100%; max-width: 500px; padding: 20px; }
+.highlight-text { font-size: 3em; color: #a29bfe; text-shadow: 0 0 20px rgba(162, 155, 254, 0.5); margin: 20px 0; }
+.big-number { font-size: 3.5em; font-weight: bold; color: #ffeaa7; margin: 20px 0; }
+
+/* 영수증 스타일 */
+.receipt-paper {
+    background: #fff; color: #333;
+    padding: 30px; margin: 0 auto;
+    width: 80%; max-width: 350px;
+    font-family: 'Courier New', Courier, monospace;
+    box-shadow: 0 0 20px rgba(255,255,255,0.1);
+    transform: rotate(-2deg);
+}
+.receipt-line { letter-spacing: 3px; color: #aaa; margin: 10px 0; overflow: hidden; white-space: nowrap; }
+.receipt-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9em; }
+.receipt-row .name { flex: 1; text-align: left; }
+.receipt-row .count { width: 40px; text-align: right; color: #666; }
+.receipt-row .price { width: 80px; text-align: right; font-weight: bold; }
+.receipt-total { display: flex; justify-content: space-between; font-size: 1.2em; font-weight: bold; margin-top: 10px; }
+.barcode { font-family: 'Libre Barcode 39', sans-serif; font-size: 2em; margin-top: 20px; opacity: 0.7; }
+
+/* 월별 원형 스타일 */
+.month-circle {
+    width: 150px; height: 150px;
+    background-color: #ff7675;
+    border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 3em; font-weight: bold;
+    margin: 30px auto;
+    box-shadow: 0 0 30px rgba(255, 118, 117, 0.6);
+}
+
+.next-btn {
+    margin-top: 40px;
+    padding: 12px 40px;
+    background-color: #6c5ce7;
+    color: white; border: none; border-radius: 30px;
+    font-size: 1.2em; cursor: pointer;
+    transition: transform 0.2s;
+}
+.next-btn:hover { transform: scale(1.1); background-color: #5f27cd; }
+.restart-btn {
+    margin-top: 20px; padding: 10px 30px;
+    background: transparent; border: 2px solid white; color: white;
+    border-radius: 20px; cursor: pointer;
+}
+
+/* 애니메이션 */
+.fade-in-up { animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(30px); }
+@keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+/* 월별 상세 영수증 (Long Receipt) 스타일 */
+.receipt-paper.long-receipt {
+    max-height: 70vh; /* 화면 높이의 70%까지만 차지 */
+    display: flex;
+    flex-direction: column;
+}
+
+.receipt-body.scrollable-body {
+    overflow-y: auto; /* 내용이 넘치면 스크롤 */
+    flex: 1;
+    padding-right: 5px;
+    margin: 10px 0;
+    max-height: 400px; /* PC화면 기준 최대 높이 */
+}
+
+/* 스크롤바 커스텀 (크롬, 사파리 등) */
+.receipt-body.scrollable-body::-webkit-scrollbar {
+    width: 6px;
+}
+.receipt-body.scrollable-body::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+}
+.receipt-body.scrollable-body::-webkit-scrollbar-thumb {
+    background: #ccc; 
+    border-radius: 3px;
+}
+.receipt-body.scrollable-body::-webkit-scrollbar-thumb:hover {
+    background: #aaa; 
+}
+
+.receipt-month-header {
+    text-align: center;
+    font-weight: bold;
+    margin: 15px 0 5px 0;
+    color: #6c5ce7;
+    border-bottom: 1px dashed #ddd;
+    padding-bottom: 2px;
+}
+.receipt-row.sub-total {
+    font-size: 0.8em;
+    font-style: italic;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+/* --- 고급 패스 (Premium Pass) 스타일 --- */
+.pass-row {
+    align-items: center;
+    padding: 5px 0;
+}
+
+.pass-info-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.month-label {
+    font-weight: bold;
+    min-width: 40px;
+}
+
+.normal-badge {
+    font-size: 0.8em;
+    color: #888;
+    background: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+.premium-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background-color: #ffeaa7;
+    color: #d35400;
+    font-size: 0.85em;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    animation: bounce 1s infinite alternate;
+}
+
+/* GIF 이미지 스타일 */
+.premium-badge img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #fff;
+    background-color: #fff;
+}
+
+/* [NEW] MP4 비디오 스타일 */
+.premium-badge video {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #fff;
+    background-color: #fff;
+    vertical-align: middle;
+}
+
+.premium-row {
+    background-color: rgba(255, 234, 167, 0.2);
+    border-radius: 5px;
+    margin: 2px 0;
+    padding: 5px;
+}
+
+@keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-2px); }
+}
+
+/* --- 사복 패스 이미지 스타일 --- */
+.sashik-row {
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dotted #eee;
+}
+
+.sashik-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.sashik-img-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #e17055;
+    background-color: #fff;
+    flex-shrink: 0; /* 이미지 찌그러짐 방지 */
+}
+
+.sashik-char-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* --- 사복 패스 갤러리 (카드 그리드) 스타일 --- */
+.sashik-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2열 배치 */
+    gap: 15px;
+    padding: 10px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.sashik-card {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    text-align: center;
+    transition: transform 0.2s;
+    color: #333;
+}
+.sashik-card:hover {
+    transform: translateY(-5px);
+}
+
+.sashik-card-wrapper {
+    width: 100%;
+    aspect-ratio: 1; /* 정사각형 비율 유지 */
+    overflow: hidden;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    border: 2px solid #fdcb6e;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sashik-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 꽉 차게 */
+    display: block;
+}
+
+.sashik-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sashik-month {
+    font-size: 0.8em;
+    color: #e17055;
+    font-weight: bold;
+    background: #ffeaa7;
+    border-radius: 10px;
+    display: inline-block;
+    padding: 2px 6px;
+    align-self: center;
+}
+
+.sashik-name {
+    font-size: 0.9em;
+    font-weight: bold;
+    word-break: keep-all;
+    line-height: 1.2;
+}
+
+
+/* --- 사복 패스 영수증 (리스트) 스타일 --- */
+.sashik-row {
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dotted #eee;
+}
+
+.sashik-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+/* 영수증용 작은 동그라미 이미지 */
+.sashik-img-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #e17055;
+    background-color: #fff;
+    flex-shrink: 0;
+}
+
+.sashik-char-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+/* 카드 순차적 등장 애니메이션 */
+.fade-in-up-stagger {
+    animation: fadeInUp 0.5s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+/* nth-child로 딜레이 주기 (최대 20개까지만 설정) */
+.sashik-card:nth-child(1) { animation-delay: 0.1s; }
+.sashik-card:nth-child(2) { animation-delay: 0.2s; }
+.sashik-card:nth-child(3) { animation-delay: 0.3s; }
+.sashik-card:nth-child(4) { animation-delay: 0.4s; }
+.sashik-card:nth-child(5) { animation-delay: 0.5s; }
+.sashik-card:nth-child(6) { animation-delay: 0.6s; }
+.sashik-card:nth-child(n+7) { animation-delay: 0.7s; }
+
+/* --- 버튼 스타일 --- */
+.save-img-btn {
+    padding: 10px 20px;
+    background-color: #fab1a0;
+    color: #2d3436;
+    border: none;
+    border-radius: 20px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+.save-img-btn:hover {
+    transform: scale(1.05);
+    background-color: #ff7675;
+    color: white;
+}
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+    margin-top: 20px;
+}
+
+/* --- Footer 스타일 --- */
+.site-footer {
+    text-align: center;
+    padding: 40px 20px;
+    margin-top: 50px;
+    border-top: 1px solid #ddd;
+    background-color: #fff;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.site-footer strong {
+    font-weight: bold;
+}
+
+.site-footer .copyright {
+    margin-top: 10px;
+    font-size: 0.8em;
+    color: #999;
+}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>트릭컬 연말결산</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="recap-body">
+    <div class="container recap-container-wrapper">
+        <header class="header-nav">
+            <a href="index.html">📊 통합 분석</a>
+            <a href="google.html">🎮 Google Play</a>
+            <a href="apple.html">🍎 Apple Store</a>
+            <a href="recap.html" class="active" style="background-color: #6c5ce7;">📅 트릭컬 연말결산</a>
+        </header>
+
+        <div id="upload-stage" class="recap-intro">
+            <h1>📅 트릭컬 연말결산</h1>
+            <p class="intro-text">
+                지난 1년, 교주님은 트릭컬에 얼마나 진심이었을까요?<br>
+                결제 내역 파일을 업로드하고 <strong>나만의 영수증</strong>을 확인해보세요!
+            </p>
+
+            <div class="year-select-wrapper">
+                <label for="year-select">📅 결산 연도 선택:</label>
+                <select id="year-select">
+                    <option value="2025" selected>2025년</option>
+                </select>
+            </div>
+            
+            <div class="upload-section">
+                <div class="upload-box">
+                    <label for="googleFileInput"><strong>Google Play (.json)</strong></label>
+                    <input type="file" id="googleFileInput" accept=".json">
+                    <span id="googleFileStatus" class="file-status"></span>
+                </div>
+                <div class="upload-box">
+                    <label for="appleFileInput"><strong>Apple Store (.html)</strong></label>
+                    <input type="file" id="appleFileInput" accept=".html, .htm">
+                    <span id="appleFileStatus" class="file-status"></span>
+                </div>
+            </div>
+
+            <button id="start-recap-btn" class="start-btn" disabled>🎬 연말결산 시작하기</button>
+            <p class="hint-text">* 파일은 서버에 전송되지 않고 브라우저에서만 처리됩니다.</p>
+        </div>
+        
+        <footer class="site-footer">
+            <p>본 서비스는 <strong>트릭컬 리바이브</strong>의 비공식 팬 메이드 툴입니다.</p>
+            <p>사용된 모든 게임 이미지 및 리소스의 저작권은 <strong style="color: #e74c3c;">EPID Games</strong>에 있습니다.</p>
+            <p class="copyright">© EPID Games. All Rights Reserved.</p>
+        </footer>
+    </div>
+
+    <div id="recap-overlay" class="hidden">
+        <button id="close-recap-btn">✖ 나가기</button>
+        <div id="recap-content-area">
+            </div>
+    </div>
+
+    <script src="js/appKeywords.js"></script>
+    <script src="js/parsers.js"></script>
+    <script src="js/recap.js"></script>
+</body>
+</html>
