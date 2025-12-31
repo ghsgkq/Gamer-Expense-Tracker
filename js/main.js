@@ -617,7 +617,7 @@ function setupEventListeners() {
                 } else {
                     filteredData = currentGameData.filter(item => item.title.includes(filter));
                 }
-                displayFullHistory(filteredData);
+                displayFullHistory(filteredData, document.getElementById('currency-select').value);
             });
         });
     }
