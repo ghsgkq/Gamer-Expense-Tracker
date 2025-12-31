@@ -135,9 +135,9 @@ function startRecapSequence() {
     const totalSpent = yearData.reduce((sum, item) => sum + item.price, 0);
     
     const dailyItems = {
-        '데일리 왕사탕': { count: 0, sum: 0 },
-        '데일리 별사탕': { count: 0, sum: 0 },
-        '데일리 엘리프': { count: 0, sum: 0 }
+        '데일리 왕사탕 공물': { count: 0, sum: 0 },
+        '데일리 별사탕 공물': { count: 0, sum: 0 },
+        '데일리 엘리프 공물': { count: 0, sum: 0 }
     };
     
     const basicPassMonthly = {};
