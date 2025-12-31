@@ -206,7 +206,7 @@ function startRecapSequence() {
             <div class="slide-content fade-in-up">
                 <h2>${year}년 트릭컬 리바이브</h2>
                 <h1 class="highlight-text">교주님의 헌신</h1>
-                <p>에르핀이 교주님의 지갑을 기억합니다.</p>
+                <p>대표님이 교주님의 지갑을 기억합니다.</p>
             </div>
         `
     });
