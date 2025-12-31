@@ -458,7 +458,6 @@ function showSlide(index) {
             }
         }
         html = generateReceiptHTML(slide.title, rows, total, true);
-        html += `<button class="save-img-btn" style="margin-top:15px; background-color:#fab1a0;" onclick="downloadLongReceipt()">📸 이미지로 저장</button>`;
     }
     else if (slide.type === 'max_month_receipt') {
         let rows = '';
