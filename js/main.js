@@ -82,21 +82,32 @@ function reprocessAllData() {
 
 function mergeData(newData) {
     for (const gameName in newData) {
-        if (combinedData[gameName]) {
-            // 중복 데이터 방지를 위해 간단한 ID 생성 및 확인
-            newData[gameName].forEach(newItem => {
-                const newItemId = `${newItem.date.toISOString()}-${newItem.title}-${newItem.price}`;
-                const isDuplicate = combinedData[gameName].some(existingItem => {
-                    const existingItemId = `${existingItem.date.toISOString()}-${existingItem.title}-${existingItem.price}`;
-                    return existingItemId === newItemId;
-                });
-                if (!isDuplicate) {
-                    combinedData[gameName].push(newItem);
-                }
-            });
-        } else {
-            combinedData[gameName] = newData[gameName];
+        // if (combinedData[gameName]) {
+        //     // 중복 데이터 방지를 위해 간단한 ID 생성 및 확인
+        //     newData[gameName].forEach(newItem => {
+        //         const newItemId = `${newItem.date.toISOString()}-${newItem.title}-${newItem.price}`;
+        //         const isDuplicate = combinedData[gameName].some(existingItem => {
+        //             const existingItemId = `${existingItem.date.toISOString()}-${existingItem.title}-${existingItem.price}`;
+        //             return existingItemId === newItemId;
+        //         });
+        //         if (!isDuplicate) {
+        //             combinedData[gameName].push(newItem);
+        //         }
+        //     });
+        // } else {
+        //     combinedData[gameName] = newData[gameName];
+        // }
+        if (!combinedData[gameName]) {
+            combinedData[gameName] = [];
         }
+        
+        // 중복 검사 로직 제거
+        // 같은 날, 같은 상품을 여러 번 구매한 경우(예: 패키지 3개 구매)도 
+        // 모두 정상적으로 등록되도록 변경했습니다.
+        newData[gameName].forEach(newItem => {
+            combinedData[gameName].push(newItem);
+        });
+
         // 날짜순으로 정렬하여 병합된 데이터의 순서 유지
         combinedData[gameName].sort((a, b) => a.date - b.date);
     }

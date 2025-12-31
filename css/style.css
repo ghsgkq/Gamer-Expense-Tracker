@@ -902,3 +902,23 @@ td:last-child { text-align: right; font-weight: 500; }
     font-size: 0.8em;
     color: #999;
 }
+
+#recap-content-area {
+    max-height: 80vh;       /* 화면 높이의 80%까지만 차지 */
+    overflow-y: auto;       /* 내용이 넘치면 세로 스크롤 생성 */
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;          /* 여백 추가 */
+    box-sizing: border-box; /* 패딩 포함 크기 계산 */
+}
+
+/* 스크롤바 꾸미기 (선택사항) */
+#recap-content-area::-webkit-scrollbar {
+    width: 8px;
+}
+#recap-content-area::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}

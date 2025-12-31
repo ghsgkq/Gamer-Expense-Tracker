@@ -379,7 +379,7 @@ function showSlide(index) {
         for (let m = 1; m <= 12; m++) {
             const info = slide.data[m];
             if (info.count > 0) {
-                const isPremium = info.count >= 2 || info.sum >= 20000;
+                const isPremium = info.count >= 2 || info.sum > 12000;
                 const badge = isPremium 
                     ? getPremiumBadgeHTML(slide.year, m)
                     : `<span class="normal-badge">일반 패스</span>`;
