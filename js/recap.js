@@ -572,7 +572,6 @@ window.downloadLongReceipt = function() {
         }
     }
 
-    // 영수증 하단에 EPID Games 저작권 명시 추가
     const receiptHTML = `
         <div id="temp-capture-area" style="position:fixed; top:-9999px; left:0; width: 400px; background-color:#2d3436; padding: 20px; font-family: 'Galmuri11', sans-serif;">
             <div class="receipt-paper" style="box-shadow:none; margin:0 auto; transform:none;">
@@ -591,7 +590,6 @@ window.downloadLongReceipt = function() {
                 
                 <div style="text-align:center; margin-top:15px; border-top:1px dotted #ccc; padding-top:10px;">
                     <div style="font-size:0.8em; color:#555; font-weight:bold;">Gamer's Expense Tracker</div>
-                    <div style="font-size:0.7em; color:#888; margin-top:4px;">Images © EPID Games</div>
                 </div>
             </div>
         </div>
