@@ -275,7 +275,7 @@ function displayDailyReport(data) {
 }
 
 function displayPassReport(data) {
-    const passKeywords = ["리바이브 패스", "트릭컬 패스"];
+    const passKeywords = ["리바이브 패스", "트릭컬 패스", "개쩜 패스"];
     const passTotal = data
         .filter(item => passKeywords.some(keyword => item.title.includes(keyword)))
         .reduce((sum, item) => sum + item.price, 0);
@@ -611,7 +611,7 @@ function setupEventListeners() {
                 if (filter === 'all') {
                     filteredData = currentGameData;
                 } else if (filter === 'pass_basic') {
-                    const passKeywords = ["리바이브 패스", "트릭컬 패스"];
+                    const passKeywords = ["리바이브 패스", "트릭컬 패스", "개쩜 패스"];
                     filteredData = currentGameData.filter(item => passKeywords.some(keyword => item.title.includes(keyword)));
                 } else if (filter === 'pass_sashik') {
                     filteredData = currentGameData.filter(item => item.title.includes("사복 패스") || item.title.includes("사복패스"));
@@ -772,6 +772,60 @@ function displayCurrentKeywords(searchTerm = '') {
     });
 }
 
+async function loadUpdateHistory() {
+    const container = document.getElementById("updateLogContainer");
+    if (!container) return;
+
+    try {
+        const response = await fetch('updates.json');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const updates = await response.json();
+
+        let html = '';
+        updates.forEach(update => {
+            html += `
+                <div class="update-item">
+                    <span class="update-date">${update.date}</span>
+                    <span class="update-title">${update.title}</span>
+                    <ul class="update-list">
+                        ${update.items.map(item => `<li>${item}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    } catch (error) {
+        console.error("업데이트 내역 로드 실패:", error);
+        container.innerHTML = "<p>업데이트 내역을 불러오지 못했습니다.</p>";
+    }
+}
+
+function setupUpdateHistoryModal() {
+    const modal = document.getElementById("updateModal");
+    const btn = document.getElementById("updateHistoryBtn");
+    const span = document.querySelector(".close-modal");
+
+    if (btn && modal) {
+        btn.onclick = function(e) {
+            e.preventDefault();
+            modal.style.display = "block";
+            loadUpdateHistory();
+        }
+    }
+
+    if (span && modal) {
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+    }
+
+    window.addEventListener('click', function(event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    });
+}
+
 
 // 초기 로드 시 이벤트 리스너 설정
 document.addEventListener('DOMContentLoaded', () => {
@@ -791,5 +845,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     setupKeywordManagement();
     displayCurrentKeywords();
+    setupUpdateHistoryModal();
 });
 
