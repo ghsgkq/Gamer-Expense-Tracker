@@ -49,6 +49,95 @@ body {
     background-color: #e74c3c;
 }
 
+.header-nav a.update-history-tab {
+    background-color: #27ae60;
+    cursor: pointer;
+}
+
+.header-nav a.update-history-tab:hover {
+    background-color: #2ecc71;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 25px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 700px;
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.close-modal {
+    color: #aaa;
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-modal:hover,
+.close-modal:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.update-log {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.update-item {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.update-item:last-child {
+    border-bottom: none;
+}
+
+.update-date {
+    font-weight: bold;
+    color: #e74c3c;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.update-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.update-list {
+    margin: 10px 0 0 20px;
+    padding: 0;
+}
+
+.update-list li {
+    margin-bottom: 5px;
+}
+
 h1, h2, h3 {
     color: #2c3e50;
     border-bottom: 2px solid #eaeaea;

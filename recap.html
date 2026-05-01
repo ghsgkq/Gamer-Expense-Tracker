@@ -81,6 +81,7 @@
             <a href="google.html">🎮 Google Play</a>
             <a href="apple.html">🍎 Apple Store</a>
             <a href="recap.html" class="active" style="background-color: #6c5ce7;">📅 트릭컬 연말결산</a>
+            <a href="#" class="update-history-tab" id="updateHistoryBtn">📜 업데이트 내역</a>
         </header>
                <h1>📅 트릭컬 연말결산</h1>
                 <p>
@@ -131,6 +132,17 @@
         <button id="close-recap-btn">✖ 나가기</button>
         <div id="recap-content-area">
             </div>
+    </div>
+
+    <!-- Update History Modal -->
+    <div id="updateModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>📢 업데이트 내역</h2>
+            <div id="updateLogContainer" class="update-log">
+                <p style="text-align:center; padding: 20px;">내역을 불러오는 중...</p>
+            </div>
+        </div>
     </div>
 
     <script src="js/appKeywords.js"></script>

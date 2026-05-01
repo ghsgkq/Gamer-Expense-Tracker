@@ -80,6 +80,7 @@
             <a href="google.html">🎮 Google Play</a>
             <a href="apple.html" class="active">🍎 Apple Store</a>
             <a href="recap.html">📅 트릭컬 연말결산</a>
+            <a href="#" class="update-history-tab" id="updateHistoryBtn">📜 업데이트 내역</a>
         </header>
         <h1>🍎 Apple Store 가계부</h1>
         <p>
@@ -168,11 +169,22 @@
                     <button class="filter-btn" data-filter="데일리 왕사탕 공물">데일리 왕사탕</button>
                     <button class="filter-btn" data-filter="데일리 별사탕 공물">데일리 별사탕</button>
                     <button class="filter-btn" data-filter="데일리 엘리프 공물">데일리 엘리프</button>
-                    <button class="filter-btn" data-filter="pass_basic">리바이브/트릭컬 패스</button>
+                    <button class="filter-btn" data-filter="pass_basic">리바이브/트릭컬/개쩜 패스</button>
                     <button class="filter-btn" data-filter="pass_sashik">사복 패스</button>
                 </div>
             </div>
             <table id="details-table"></table>
+        </div>
+    </div>
+
+    <!-- Update History Modal -->
+    <div id="updateModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>📢 업데이트 내역</h2>
+            <div id="updateLogContainer" class="update-log">
+                <p style="text-align:center; padding: 20px;">내역을 불러오는 중...</p>
+            </div>
         </div>
     </div>
     
