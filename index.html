@@ -136,10 +136,31 @@
         
         <!-- 전체 통계 차트 섹션 -->
         <div id="overall-stats-section" class="hidden">
-            <h2>📊 전체 결제 통계</h2>
+            <div class="stats-header">
+                <h2>📊 전체 결제 통계</h2>
+                <div class="stats-controls">
+                    <label for="overall-chart-type">보기 방식:</label>
+                    <select id="overall-chart-type">
+                        <option value="cumulative">누적 추이 (전체)</option>
+                        <option value="yearly">년도별 합계</option>
+                    </select>
+                </div>
+            </div>
             <div class="chart-container">
                 <canvas id="overall-spending-chart"></canvas>
             </div>
+        </div>
+
+        <!-- 년도별 상세 분석 섹션 -->
+        <div id="yearly-detail-section" class="hidden">
+            <div class="stats-header">
+                <h2>📅 년도별 상세 분석</h2>
+                <div class="stats-controls">
+                    <label for="year-detail-select">년도 선택:</label>
+                    <select id="year-detail-select"></select>
+                </div>
+            </div>
+            <div id="yearly-detail-summary" class="summary-box tertiary"></div>
         </div>
 
         <!-- 게임 선택 섹션 -->
