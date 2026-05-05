@@ -76,26 +76,40 @@
 <body>
     <div class="container">
         <header class="header-nav">
-            <a href="index.html" class="active">📊 통합 분석</a>
-            <a href="google.html">🎮 Google Play</a>
-            <a href="apple.html">🍎 Apple Store</a>
+            <a href="#" class="nav-link active" data-mode="all">📊 통합 분석</a>
+            <a href="#" class="nav-link" data-mode="google">🎮 Google Play</a>
+            <a href="#" class="nav-link" data-mode="apple">🍎 Apple Store</a>
             <a href="recap.html">📅 트릭컬 연말결산</a>
             <a href="#" class="update-history-tab" id="updateHistoryBtn">📜 업데이트 내역</a>
         </header>
-        <h1>🎮 게이머 가계부 🍎 (통합)</h1>
-        <p>
-            Google Takeout의 <strong>'Order History.json'</strong> (<a href="guide/guide.html" target="_blank">파일 다운로드 가이드 보기</a>)<br>
-            Apple '문제 신고' 페이지의 <strong>HTML</strong> (<a href="guide/apple_guide.html" target="_blank">파일 다운로드 가이드 보기</a>)<br>
-            파일을 업로드하여 결제 내역을 통합 분석하세요.
-        </p>
+        <h1 id="main-title">🎮 게이머 가계부 🍎 (통합)</h1>
+        <div id="description-all" class="page-description">
+            <p>
+                Google Takeout의 <strong>'Order History.json'</strong> (<a href="guide/guide.html" target="_blank">파일 다운로드 가이드 보기</a>)<br>
+                Apple '문제 신고' 페이지의 <strong>HTML</strong> (<a href="guide/apple_guide.html" target="_blank">파일 다운로드 가이드 보기</a>)<br>
+                파일을 업로드하여 결제 내역을 통합 분석하세요.
+            </p>
+        </div>
+        <div id="description-google" class="page-description hidden">
+            <p>
+                Google Takeout의 <strong>'Order History.json'</strong> 파일을 업로드하여 결제 내역을 분석하세요.
+                (<a href="guide/guide.html" target="_blank">파일 다운로드 가이드 보기</a>)
+            </p>
+        </div>
+        <div id="description-apple" class="page-description hidden">
+            <p>
+                Apple '문제 신고' 페이지의 <strong>HTML</strong> 파일을 업로드하여 결제 내역을 분석하세요.
+                (<a href="guide/apple_guide.html" target="_blank">파일 다운로드 가이드 보기</a>)
+            </p>
+        </div>
         
         <div class="upload-section">
-            <div class="upload-box">
+            <div class="upload-box" id="google-upload-box">
                 <label for="googleFileInput"><strong>Google Play (.json)</strong></label>
                 <input type="file" id="googleFileInput" accept=".json">
                 <span id="googleFileStatus" class="file-status"></span>
             </div>
-            <div class="upload-box">
+            <div class="upload-box" id="apple-upload-box">
                 <label for="appleFileInput"><strong>Apple Store (.html)</strong></label>
                 <input type="file" id="appleFileInput" accept=".html, .htm">
                 <span id="appleFileStatus" class="file-status"></span>
