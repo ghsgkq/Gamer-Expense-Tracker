@@ -69,7 +69,7 @@ function parseGoogleData(orders) {
         if (!processedData[appName]) {
             processedData[appName] = [];
         }
-        processedData[appName].push({ date, title, price: netPrice, currency: priceInfo.currency });
+        processedData[appName].push({ date, title, price: netPrice, currency: priceInfo.currency, source: 'google' });
     });
     return processedData;
 }
