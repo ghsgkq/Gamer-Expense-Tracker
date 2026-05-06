@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이시움 라운지 구매 내역 저장 가이드</title>
+    <style>
+        @import url('https://cdn.jsdelivr.net/npm/galmuri/dist/galmuri.css');
+
+        body {
+            font-family: 'Galmuri11', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: #fff;
+            padding: 30px 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #eaeaea;
+            padding-bottom: 10px;
+        }
+
+        ol {
+            list-style-type: none;
+            counter-reset: step-counter;
+            padding-left: 0;
+        }
+
+        li {
+            counter-increment: step-counter;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        li::before {
+            content: counter(step-counter);
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #fff;
+            background-color: #f1c40f;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            min-width: 35px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+            margin-top: 5px;
+        }
+        
+        .step-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        p {
+            line-height: 1.6;
+            margin: 5px 0;
+        }
+
+        strong {
+            color: #e74c3c;
+        }
+
+        code {
+            background-color: #ecf0f1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
+        
+        .note {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+
+        .warning-box {
+            background-color: #fff0f0;
+            border: 2px solid #e74c3c;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .warning-box h2 {
+            color: #c0392b;
+            margin-top: 0;
+            border: none;
+        }
+        .warning-box p {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ 아이시움 라운지 구매 내역 저장 가이드</h1>
+         <div class="warning-box">
+            <h2>⚠️ 중요: 개인정보 보호 경고</h2>
+            <p>저장하는 HTML 파일에는 계정 정보 및 결제 관련 민감한 데이터가 포함되어 있을 수 있습니다.</p>
+            <p>절대로 이 파일을 다른 사람에게 공유하거나 공개된 장소에 업로드하지 마세요.</p>
+            <p>이 분석기는 사용자의 컴퓨터에서만 파일을 처리하며, 어떠한 데이터도 외부 서버로 전송하지 않습니다.</p>
+        </div>
+        <p>결제 내역 분석을 위해 아이시움 라운지(웹 상점)에서 구매 내역 HTML 파일을 저장하는 방법을 안내합니다.</p>
+
+        <ol>
+            <li>
+                <div class="step-content">
+                    <p>먼저 <a href="https://shop.trickcal.com/" target="_blank">아이시움 라운지 사이트</a>에 접속하여 게임 계정으로 로그인합니다.</p>
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <p>로그인 후, 상단 메뉴에 <strong>'마이페이지'</strong> 버튼을 클릭하여 이동합니다.</p>
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <p><strong>'구매 내역'</strong> 버튼을 클릭하여 구매 내역으로 이동합니다.</p>
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <p>구매 내역 페이지에서 <strong>더 불러오기를 눌러, 모든 구매 내역이 불러올 수 있도록 합니다.</strong></p>
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <p>모든 내역이 화면에 보인다면, 마우스 오른쪽 버튼을 클릭하여 <strong>'다른 이름으로 저장'</strong>을 선택합니다.</p>
+                    <p>(단축키: <strong>`Ctrl + S`</strong> 또는 <strong>`Cmd + S`</strong>)</p>
+                    <p>파일 형식을 <strong>'웹페이지, 전체'</strong>로 설정하여 저장해 주세요.</p>
+                </div>
+            </li>
+            <li>
+                <div class="step-content">
+                    <p>저장된 <code>.html</code> 파일을 분석기의 아이시움 라운지 업로드 영역에 넣어주세요.</p>
+                </div>
+            </li>
+        </ol>
+
+        <div class="note">
+            <p><strong>참고:</strong> 이 과정에서 저장한 파일은 브라우저 메모리 상에서만 처리되며 외부로 유출되지 않습니다.</p>
+        </div>
+    </div>
+</body>
+</html>
