@@ -170,10 +170,10 @@ function startRecapSequence() {
     const yearSelect = document.getElementById('year-select');
     const year = parseInt(yearSelect.value);
     
-    const trickcalData = combinedData['트릭컬 리바이브'];
+    const trickcalData = combinedData['트릭컬 리바이브'] || combinedData['트릭컬 글로벌 서버'];
 
     if (!trickcalData) {
-        alert("업로드된 파일에서 '트릭컬 리바이브' 결제 내역을 찾을 수 없습니다! 😭");
+        alert("업로드된 파일에서 '트릭컬' 관련 결제 내역을 찾을 수 없습니다! 😭");
         return;
     }
 
@@ -188,11 +188,12 @@ function startRecapSequence() {
 
     // 통계 계산
     const totalSpent = yearData.reduce((sum, item) => sum + item.price, 0);
+    const currencySymbol = yearData[0]?.currency || '₩';
     
     const dailyItems = {
-        '데일리 왕사탕 공물': { count: 0, sum: 0 },
-        '데일리 별사탕 공물': { count: 0, sum: 0 },
-        '데일리 엘리프 공물': { count: 0, sum: 0 }
+        '데일리 왕사탕 공물': { count: 0, sum: 0, keywords: ['데일리 왕사탕 공물', 'Daily Candy Offering'] },
+        '데일리 별사탕 공물': { count: 0, sum: 0, keywords: ['데일리 별사탕 공물', 'Daily Star Candy Offering'] },
+        '데일리 엘리프 공물': { count: 0, sum: 0, keywords: ['데일리 엘리프 공물', 'Daily Crystal Leaf Offering'] }
     };
     
     const basicPassMonthly = {};
@@ -211,18 +212,19 @@ function startRecapSequence() {
 
         let isDaily = false;
         for (const key in dailyItems) {
-            if (cleanedName.includes(key) || cleanedName.includes(key.replace('데일리 ', ''))) {
+            if (dailyItems[key].keywords.some(k => cleanedName.includes(k) || cleanedName.includes(k.replace('데일리 ', '')))) {
                 dailyItems[key].count++;
                 dailyItems[key].sum += item.price;
                 isDaily = true;
+                break;
             }
         }
 
         if (!isDaily) {
-            if (cleanedName.includes('트릭컬 패스') || cleanedName.includes('리바이브 패스') || cleanedName.includes('개쩜 패스')) {
+            if (cleanedName.includes('트릭컬 패스') || cleanedName.includes('리바이브 패스') || cleanedName.includes('개쩜 패스') || cleanedName.includes('Trickcal Pass') || cleanedName.includes('Trickcal Revive Pass')) {
                 basicPassMonthly[month].count++;
                 basicPassMonthly[month].sum += item.price;
-            } else if (cleanedName.includes('사복 패스') || cleanedName.includes('사복패스')) {
+            } else if (cleanedName.includes('사복 패스') || cleanedName.includes('사복패스') || cleanedName.includes('Civvies Pass')) {
                 const sashikItem = { ...item, title: cleanedName };
                 sashikCollection.push(sashikItem);
                 sashikPassMonthly[month].push(sashikItem);
@@ -255,11 +257,12 @@ function startRecapSequence() {
     recapSlides = [];
 
     // 1. 인트로
+    const gameDisplayName = combinedData['트릭컬 글로벌 서버'] && !combinedData['트릭컬 리바이브'] ? '트릭컬 글로벌 서버' : '트릭컬 리바이브';
     recapSlides.push({
         type: 'intro',
         content: `
             <div class="slide-content fade-in-up">
-                <h2>${year}년 트릭컬 리바이브</h2>
+                <h2>${year}년 ${gameDisplayName}</h2>
                 <h1 class="highlight-text">교주님의 헌신</h1>
                 <p>대표님이 교주님의 지갑을 기억합니다.</p>
             </div>
@@ -274,7 +277,7 @@ function startRecapSequence() {
             <div class="slide-content fade-in-up">
                 <h2>이번년도 에피드에 바친 금액</h2>
                 <div class="big-number odometer" id="total-amount">0</div>
-                <p>원</p>
+                <p>${currencySymbol}</p>
             </div>
         `
     });

@@ -379,13 +379,13 @@ function updateDisplayForGame(gameName) {
     const trickcalSummary = document.getElementById('trickcal-specific-summary');
     const trickcalFilters = document.getElementById('trickcal-filter-buttons');
 
-    if (gameName === '트릭컬 리바이브') {
+    if (gameName === '트릭컬 리바이브' || gameName === '트릭컬 글로벌 서버') {
         trickcalSummary.classList.remove('hidden');
         trickcalFilters.classList.remove('hidden');
-        displayDailyReport(currentGameData);
-        displayPassReport(currentGameData);
-        displaySashikPassReport(currentGameData);
-        displayIciumReport(currentGameData);
+        displayDailyReport(currentGameData, currency);
+        displayPassReport(currentGameData, currency);
+        displaySashikPassReport(currentGameData, currency);
+        displayIciumReport(currentGameData, currency);
     } else {
         trickcalSummary.classList.add('hidden');
         trickcalFilters.classList.add('hidden');
@@ -423,34 +423,38 @@ function displaySummary(data, currency) {
     }
 }
 
-function displayDailyReport(data) {
-    const dailyItems = ["데일리 왕사탕 공물", "데일리 엘리프 공물", "데일리 별사탕 공물"];
+function displayDailyReport(data, currency) {
+    const dailyKeywords = [
+        "데일리 왕사탕 공물", "데일리 엘리프 공물", "데일리 별사탕 공물",
+        "Daily Crystal Leaf Offering", "Daily Candy Offering", "Daily Star Candy Offering"
+    ];
     const dailyTotal = data
-        .filter(item => dailyItems.some(daily => item.title.includes(daily)))
+        .filter(item => dailyKeywords.some(keyword => item.title.includes(keyword)))
         .reduce((sum, item) => sum + item.price, 0);
-    document.getElementById('daily-summary').innerHTML = `데일리 3종 총 결제액: <strong>₩${dailyTotal.toLocaleString()}</strong>`;
+    document.getElementById('daily-summary').innerHTML = `데일리 3종 총 결제액: <strong>${currency}${dailyTotal.toLocaleString()}</strong>`;
 }
 
-function displayPassReport(data) {
-    const passKeywords = ["리바이브 패스", "트릭컬 패스", "개쩜 패스"];
+function displayPassReport(data, currency) {
+    const passKeywords = ["리바이브 패스", "트릭컬 패스", "개쩜 패스", "Trickcal Pass", "Trickcal Revive Pass"];
     const passTotal = data
         .filter(item => passKeywords.some(keyword => item.title.includes(keyword)))
         .reduce((sum, item) => sum + item.price, 0);
-    document.getElementById('pass-summary').innerHTML = `리바이브/트릭컬/개쩜 패스 총 결제액: <strong>₩${passTotal.toLocaleString()}</strong>`;
+    document.getElementById('pass-summary').innerHTML = `리바이브/트릭컬/개쩜 패스 총 결제액: <strong>${currency}${passTotal.toLocaleString()}</strong>`;
 }
 
-function displaySashikPassReport(data) {
+function displaySashikPassReport(data, currency) {
+    const sashikKeywords = ["사복 패스", "사복패스", "Civvies Pass"];
     const sashikTotal = data
-        .filter(item => item.title.includes("사복 패스") || item.title.includes("사복패스"))
+        .filter(item => sashikKeywords.some(keyword => item.title.includes(keyword)))
         .reduce((sum, item) => sum + item.price, 0);
-    document.getElementById('sashik-pass-summary').innerHTML = `사복 패스 총 결제액: <strong>₩${sashikTotal.toLocaleString()}</strong>`;
+    document.getElementById('sashik-pass-summary').innerHTML = `사복 패스 총 결제액: <strong>${currency}${sashikTotal.toLocaleString()}</strong>`;
 }
 
-function displayIciumReport(data) {
+function displayIciumReport(data, currency) {
     const iciumTotal = data
         .filter(item => item.source === 'icium')
         .reduce((sum, item) => sum + item.price, 0);
-    document.getElementById('icium-summary').innerHTML = `아이시움 라운지 총 결제액: <strong>₩${iciumTotal.toLocaleString()}</strong>`;
+    document.getElementById('icium-summary').innerHTML = `아이시움 라운지 총 결제액: <strong>${currency}${iciumTotal.toLocaleString()}</strong>`;
 }
 
 function displayMonthlyReport(data, currency) {
