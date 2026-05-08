@@ -151,7 +151,15 @@ function parseIciumData(doc) {
 
         const priceElements = card.querySelectorAll('.text-lg');
         // 보통 두 번째 .text-lg가 가격임
-        const priceText = priceElements.length > 1 ? priceElements[1].textContent.trim() : "";
+        let priceText = "";
+        if (priceElements.length > 1) {
+            const priceElement = priceElements[1];
+            // 할인 전 가격(line-through)이 포함된 경우 제거하고 실제 결제액만 추출
+            const clone = priceElement.cloneNode(true);
+            const originalPrices = clone.querySelectorAll('.line-through');
+            originalPrices.forEach(el => el.remove());
+            priceText = clone.textContent.trim();
+        }
         const priceInfo = parsePrice(priceText);
 
         const appName = '트릭컬 리바이브'; 
