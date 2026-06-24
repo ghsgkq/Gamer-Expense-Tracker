@@ -174,3 +174,31 @@ function parseIciumData(doc) {
 
     return processedData;
 }
+
+/**
+ * 기존 결제 데이터 구조에 새로운 파싱 데이터를 병합하고 날짜순으로 정렬합니다.
+ * 중복 방지 로직(아이시움 제외)을 내장하고 있습니다.
+ */
+function mergePaymentData(combined, newData) {
+    for (const gameName in newData) {
+        if (combined[gameName]) {
+            newData[gameName].forEach(newItem => {
+                const newItemId = `${newItem.date.toISOString()}-${newItem.title}-${newItem.price}`;
+                // 아이시움 데이터는 동일 구매가 겹칠 수 있으므로 중복 제거 대상에서 생략
+                const isDuplicate = newItem.source !== 'icium' && combined[gameName].some(existingItem => {
+                    const existingItemId = `${existingItem.date.toISOString()}-${existingItem.title}-${existingItem.price}`;
+                    return existingItemId === newItemId;
+                });
+                if (!isDuplicate) {
+                    combined[gameName].push(newItem);
+                }
+            });
+        } else {
+            combined[gameName] = [...newData[gameName]];
+        }
+
+        // 날짜순으로 정렬
+        combined[gameName].sort((a, b) => a.date - b.date);
+    }
+    return combined;
+}

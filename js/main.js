@@ -97,27 +97,7 @@ function reprocessAllData() {
 }
 
 function mergeData(newData) {
-    for (const gameName in newData) {
-        if (combinedData[gameName]) {
-            // 중복 데이터 방지를 위해 간단한 ID 생성 및 확인
-            newData[gameName].forEach(newItem => {
-                const newItemId = `${newItem.date.toISOString()}-${newItem.title}-${newItem.price}`;
-                // 아이시움 데이터는 중복 구매가 많을 수 있으므로 중복 체크를 건너뜁니다.
-                const isDuplicate = newItem.source !== 'icium' && combinedData[gameName].some(existingItem => {
-                    const existingItemId = `${existingItem.date.toISOString()}-${existingItem.title}-${existingItem.price}`;
-                    return existingItemId === newItemId;
-                });
-                if (!isDuplicate) {
-                    combinedData[gameName].push(newItem);
-                }
-            });
-        } else {
-            combinedData[gameName] = newData[gameName];
-        }
-
-        // 날짜순으로 정렬하여 병합된 데이터의 순서 유지
-        combinedData[gameName].sort((a, b) => a.date - b.date);
-    }
+    mergePaymentData(combinedData, newData);
 }
 
 function updateUI() {
@@ -1178,60 +1158,6 @@ function displayCurrentKeywords(searchTerm = '') {
         });
         keywordsLi.appendChild(keywordsSpan);
         listElement.appendChild(keywordsLi);
-    });
-}
-
-async function loadUpdateHistory() {
-    const container = document.getElementById("updateLogContainer");
-    if (!container) return;
-
-    try {
-        const response = await fetch('updates.json');
-        if (!response.ok) throw new Error('Network response was not ok');
-        const updates = await response.json();
-
-        let html = '';
-        updates.forEach(update => {
-            html += `
-                <div class="update-item">
-                    <span class="update-date">${update.date}</span>
-                    <span class="update-title">${update.title}</span>
-                    <ul class="update-list">
-                        ${update.items.map(item => `<li>${item}</li>`).join('')}
-                    </ul>
-                </div>
-            `;
-        });
-        container.innerHTML = html;
-    } catch (error) {
-        console.error("업데이트 내역 로드 실패:", error);
-        container.innerHTML = "<p>업데이트 내역을 불러오지 못했습니다.</p>";
-    }
-}
-
-function setupUpdateHistoryModal() {
-    const modal = document.getElementById("updateModal");
-    const btn = document.getElementById("updateHistoryBtn");
-    const span = document.querySelector(".close-modal");
-
-    if (btn && modal) {
-        btn.onclick = function(e) {
-            e.preventDefault();
-            modal.style.display = "block";
-            loadUpdateHistory();
-        }
-    }
-
-    if (span && modal) {
-        span.onclick = function() {
-            modal.style.display = "none";
-        }
-    }
-
-    window.addEventListener('click', function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
     });
 }
 
