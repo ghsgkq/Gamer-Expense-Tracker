@@ -90,6 +90,7 @@ function reprocessAllData() {
     
     if (Object.keys(combinedData).length > 0) {
         document.getElementById('keyword-manager')?.classList.remove('hidden');
+        document.getElementById('exportAllExcelButton')?.classList.remove('hidden');
     }
     
     updateUI();
@@ -945,6 +946,45 @@ function setupEventListeners() {
         });
     }
     
+    const exportAllExcelButton = document.getElementById('exportAllExcelButton');
+    if (exportAllExcelButton) {
+        exportAllExcelButton.addEventListener('click', () => {
+            const currentFilteredData = getFilteredCombinedData();
+            const allItems = [];
+            Object.keys(currentFilteredData).forEach(gameName => {
+                currentFilteredData[gameName].forEach(item => {
+                    allItems.push({
+                        ...item,
+                        gameName: gameName
+                    });
+                });
+            });
+            allItems.sort((a, b) => a.date - b.date);
+
+            const todayStr = getLocalDateString(new Date()).replace(/-/g, '');
+            downloadDataToExcel(allItems, `모든_결제_내역_${todayStr}.xlsx`, true);
+        });
+    }
+
+    const exportGameExcelButton = document.getElementById('exportGameExcelButton');
+    if (exportGameExcelButton) {
+        exportGameExcelButton.addEventListener('click', () => {
+            const selectedGame = document.getElementById('game-selector').value;
+            if (!selectedGame) {
+                alert("선택된 게임이 없습니다.");
+                return;
+            }
+            if (!currentGameData || currentGameData.length === 0) {
+                alert("내보낼 거래 내역이 없습니다.");
+                return;
+            }
+            
+            const todayStr = getLocalDateString(new Date()).replace(/-/g, '');
+            const cleanGameName = selectedGame.replace(/[\s\/:*?"<>|]/g, '_');
+            downloadDataToExcel(currentGameData, `${cleanGameName}_결제_내역_${todayStr}.xlsx`, false);
+        });
+    }
+
     const resetButton = document.getElementById('resetButton');
     if (resetButton) {
         resetButton.addEventListener('click', () => {
@@ -972,7 +1012,7 @@ function resetAllData() {
     }
 
     // UI 초기화
-    ['overall-summary-section', 'overall-stats-section', 'yearly-detail-section', 'game-selector-section', 'summary', 'trickcal-specific-summary', 'monthly-report', 'full-history','currency-section', 'keyword-manager'].forEach(id => {
+    ['overall-summary-section', 'overall-stats-section', 'yearly-detail-section', 'game-selector-section', 'summary', 'trickcal-specific-summary', 'monthly-report', 'full-history','currency-section', 'keyword-manager', 'exportAllExcelButton'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
     });
@@ -1188,4 +1228,98 @@ window.addEventListener('hashchange', () => {
         switchAppMode(hash);
     }
 });
+
+/**
+ * 결제 내역 데이터를 가공하고 통화별 합계 정보를 추가하여 엑셀 파일로 다운로드합니다.
+ * @param {Array} data 결제 아이템 객체들의 배열
+ * @param {string} filename 저장할 파일명
+ * @param {boolean} isAll 전체 결제 내역 여부 (플랫폼 및 앱 이름 포함 여부 결정)
+ */
+function downloadDataToExcel(data, filename, isAll) {
+    if (!data || data.length === 0) {
+        alert("내보낼 데이터가 없습니다.");
+        return;
+    }
+
+    // 1. JSON 데이터 가공
+    const mappedData = data.map(item => {
+        const platformName = item.source === 'google' ? '구글 플레이스토어' : (item.source === 'apple' ? '애플 앱스토어' : (item.source === 'icium' ? '아이시움 라운지' : '기타'));
+        
+        if (isAll) {
+            return {
+                "날짜": getLocalDateString(item.date),
+                "플랫폼": platformName,
+                "앱/게임명": item.gameName || '기타',
+                "상품명": item.title,
+                "결제 금액": item.price,
+                "통화": item.currency
+            };
+        } else {
+            return {
+                "날짜": getLocalDateString(item.date),
+                "플랫폼": platformName,
+                "상품명": item.title,
+                "결제 금액": item.price,
+                "통화": item.currency
+            };
+        }
+    });
+
+    // 2. 통화별 총액(Sum) 계산
+    const totals = {};
+    data.forEach(item => {
+        if (!totals[item.currency]) {
+            totals[item.currency] = 0;
+        }
+        totals[item.currency] += parseFloat(item.price);
+    });
+
+    // 3. 합계 행 생성 및 추가
+    mappedData.push({});
+
+    Object.keys(totals).forEach(currency => {
+        if (isAll) {
+            mappedData.push({
+                "날짜": `총 결제액 (${currency})`,
+                "플랫폼": "",
+                "앱/게임명": "",
+                "상품명": "",
+                "결제 금액": totals[currency],
+                "통화": currency
+            });
+        } else {
+            mappedData.push({
+                "날짜": `총 결제액 (${currency})`,
+                "플랫폼": "",
+                "상품명": "",
+                "결제 금액": totals[currency],
+                "통화": currency
+            });
+        }
+    });
+
+    // 4. SheetJS 워크시트 생성
+    const worksheet = XLSX.utils.json_to_sheet(mappedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "결제 내역");
+
+    // 5. 열 너비 자동 최적화 (Auto-fit Columns)
+    const cols = Object.keys(mappedData[0] || {}).map(key => {
+        let maxLen = key.length * 2;
+        mappedData.forEach(row => {
+            const val = row[key];
+            if (val !== undefined && val !== null) {
+                const len = val.toString().length;
+                if (len > maxLen) {
+                    maxLen = len;
+                }
+            }
+        });
+        return { wch: Math.max(10, maxLen + 3) };
+    });
+    worksheet["!cols"] = cols;
+
+    // 6. 파일 쓰기 및 다운로드
+    XLSX.writeFile(workbook, filename);
+}
 

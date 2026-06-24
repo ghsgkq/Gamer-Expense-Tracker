@@ -1063,3 +1063,61 @@ td:last-child { text-align: right; font-weight: 500; }
         grid-template-columns: 1fr;
     }
 }
+
+/* 메인 액션 버튼 레이아웃 */
+.main-actions-row {
+    display: flex;
+    gap: 15px;
+    margin: 10px 0 30px 0;
+}
+
+.main-actions-row button {
+    flex: 1;
+    margin: 0 !important; /* 기존 resetButton 마진 리셋 */
+}
+
+#exportAllExcelButton {
+    padding: 12px;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#exportAllExcelButton:hover {
+    background-color: #27ae60;
+}
+
+/* 개별 게임 내역 헤더 레이아웃 */
+.full-history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.full-history-header h2 {
+    margin: 0 !important;
+}
+
+#exportGameExcelButton {
+    padding: 8px 16px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#exportGameExcelButton:hover {
+    background-color: #2980b9;
+}
