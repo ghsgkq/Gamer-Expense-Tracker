@@ -72,6 +72,7 @@
     <title>게이머 가계부 (통합)</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -121,7 +122,10 @@
                 <span id="iciumFileStatus" class="file-status"></span>
             </div>
         </div>
-        <button id="resetButton">초기화</button>
+        <div class="main-actions-row">
+            <button id="resetButton">초기화</button>
+            <button id="exportAllExcelButton" class="hidden">📊 전체 내역 엑셀 다운로드</button>
+        </div>
         
         <!-- 키워드 관리 -->
         <div id="keyword-manager" class="hidden">
@@ -212,7 +216,10 @@
         </div>
 
         <div id="full-history" class="hidden">
-            <h2>🧾 전체 결제 내역</h2>
+            <div class="full-history-header">
+                <h2>🧾 전체 결제 내역</h2>
+                <button id="exportGameExcelButton">📥 현재 게임 엑셀 다운로드</button>
+            </div>
             
             <div id="filter-section">
                 <div id="search-container">
