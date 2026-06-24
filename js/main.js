@@ -2,6 +2,7 @@
 let combinedData = {};
 let currentGameData = [];
 let overallChartInstance = null;
+let distributionChartInstance = null;
 let rawGoogleData = null;
 let rawAppleData = null;
 let rawIciumData = null;
@@ -126,6 +127,7 @@ function updateUI() {
     populateYearDetailSelector();
     populateGameSelector();
     displayOverallStatsChart(filteredData);
+    displayDistributionChart(filteredData);
 }
 
 // 현재 appMode와 selectedYear에 따라 필터링된 데이터를 반환하는 헬퍼 함수
@@ -766,6 +768,102 @@ function displayOverallStatsChart(data) {
     });
 }
 
+function displayDistributionChart(data) {
+    const overallStatsSection = document.getElementById('overall-stats-section');
+    const canvas = document.getElementById('distribution-chart');
+    const currency = document.getElementById('currency-select').value;
+
+    if (!canvas) return; // 해당 캔버스가 없는 페이지일 수 있음
+
+    const ctx = canvas.getContext('2d');
+
+    if (Object.keys(data).length === 0) {
+        if (distributionChartInstance) {
+            distributionChartInstance.destroy();
+            distributionChartInstance = null;
+        }
+        return;
+    }
+
+    const gameTotals = Object.keys(data).map(gameName => {
+        const total = data[gameName]
+            .filter(d => d.currency === currency)
+            .reduce((sum, item) => sum + item.price, 0);
+        return { name: gameName, total };
+    }).filter(g => g.total > 0);
+
+    if (gameTotals.length === 0) {
+        if (distributionChartInstance) {
+            distributionChartInstance.destroy();
+            distributionChartInstance = null;
+        }
+        return;
+    }
+
+    // 지출 금액 기준 내림차순 정렬
+    gameTotals.sort((a, b) => b.total - a.total);
+
+    let chartData = [];
+    let chartLabels = [];
+    const colors = ['#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6', '#34495e', '#1abc9c', '#95a5a6'];
+
+    if (gameTotals.length > 7) {
+        const topGames = gameTotals.slice(0, 6);
+        const othersTotal = gameTotals.slice(6).reduce((sum, g) => sum + g.total, 0);
+        chartLabels = topGames.map(g => g.name).concat('기타');
+        chartData = topGames.map(g => g.total).concat(othersTotal);
+    } else {
+        chartLabels = gameTotals.map(g => g.name);
+        chartData = gameTotals.map(g => g.total);
+    }
+
+    const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            title: {
+                display: true,
+                text: '게임별 소비 분포 (' + currency + ' 기준)'
+            },
+            legend: {
+                position: window.innerWidth < 768 ? 'bottom' : 'right',
+                labels: {
+                    boxWidth: 12,
+                    padding: 8
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const label = context.label || '';
+                        const value = context.parsed;
+                        const sum = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = ((value / sum) * 100).toFixed(1);
+                        return `${label}: ${currency}${value.toLocaleString()} (${percentage}%)`;
+                    }
+                }
+            }
+        }
+    };
+
+    if (distributionChartInstance) {
+        distributionChartInstance.destroy();
+    }
+
+    distributionChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: chartLabels,
+            datasets: [{
+                data: chartData,
+                backgroundColor: colors.slice(0, chartLabels.length),
+                borderWidth: 1
+            }]
+        },
+        options: options
+    });
+}
+
 function setupEventListeners() {
     const gameSelector = document.getElementById('game-selector');
     const currencySelect = document.getElementById('currency-select');
@@ -779,13 +877,11 @@ function setupEventListeners() {
     if(currencySelect){
         currencySelect.addEventListener('change', () => {
             if (gameSelector) {
-                displayOverallSummaries();
+                const filteredData = getFilteredCombinedData();
+                displayOverallSummaries(filteredData);
                 populateYearDetailSelector();
-                if (overallChartInstance) {
-                    overallChartInstance.destroy();
-                    overallChartInstance = null;
-                }
-                displayOverallStatsChart(combinedData);
+                displayOverallStatsChart(filteredData);
+                displayDistributionChart(filteredData);
                 populateGameSelector();
                 updateDisplayForGame(gameSelector.value);
             }
@@ -794,7 +890,8 @@ function setupEventListeners() {
 
     if (chartTypeSelect) {
         chartTypeSelect.addEventListener('change', () => {
-            displayOverallStatsChart(combinedData);
+            const filteredData = getFilteredCombinedData();
+            displayOverallStatsChart(filteredData);
         });
     }
 
@@ -888,6 +985,10 @@ function resetAllData() {
     if (overallChartInstance) {
         overallChartInstance.destroy();
         overallChartInstance = null;
+    }
+    if (distributionChartInstance) {
+        distributionChartInstance.destroy();
+        distributionChartInstance = null;
     }
 
     // UI 초기화
