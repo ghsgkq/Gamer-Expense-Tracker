@@ -96,7 +96,8 @@ function parseAppleData(doc) {
             const publisherEl = item.querySelector('.pli-publisher');
 
             if (titleEl && priceEl) {
-                const title = titleEl.getAttribute('aria-label').trim();
+                const title = (titleEl.getAttribute('aria-label') || titleEl.textContent || '').trim();
+                if (!title) return;
                 let priceText = priceEl.textContent.trim();
                 
                 if (priceText === '무료' || !priceText) return;
@@ -110,7 +111,7 @@ function parseAppleData(doc) {
                     if (!processedData[appName]) {
                         processedData[appName] = [];
                     }
-                    processedData[appName].push({ date, title, price: priceInfo.amount, currency: priceInfo.currency });
+                    processedData[appName].push({ date, title, price: priceInfo.amount, currency: priceInfo.currency, source: 'apple' });
                 }
             }
         });
@@ -143,7 +144,7 @@ function parseIciumData(doc) {
 
         const orderDateStr = card.querySelector('.text-slate-700')?.textContent.replace(' 주문', '').trim();
         // '2024. 12. 30.' 또는 '2024.12.30' 형식 파싱
-        const dateParts = orderDateStr.match(/(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})/);
+        const dateParts = orderDateStr?.match(/(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})/);
         if (!dateParts) return;
         const date = new Date(dateParts[1], dateParts[2] - 1, dateParts[3]);
 
