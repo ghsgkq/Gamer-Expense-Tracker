@@ -487,10 +487,10 @@ function displayMonthlyReport(data, currency) {
     displayMonthlyChart(Object.keys(monthlyTotals).reduce((acc, month) => {
         acc[month] = monthlyTotals[month].reduce((sum, item) => sum + item.price, 0);
         return acc;
-    }, {}));
+    }, {}), currency);
 }
 
-function displayMonthlyChart(monthlyData) {
+function displayMonthlyChart(monthlyData, currency) {
     const chartContainer = document.getElementById('monthly-chart-container');
     const sortedMonths = Object.keys(monthlyData).sort();
     
@@ -517,8 +517,8 @@ function displayMonthlyChart(monthlyData) {
 
         chartHTML += `
             <div class="chart-bar-wrapper"> 
-                <div class="chart-amount">₩${amount.toLocaleString()}</div>
-                <div class="chart-bar" style="height: ${barHeight}%;" title="${month}: ₩${amount.toLocaleString()}"></div>
+                <div class="chart-amount">${currency}${amount.toLocaleString()}</div>
+                <div class="chart-bar" style="height: ${barHeight}%;" title="${month}: ${currency}${amount.toLocaleString()}"></div>
                 <div class="chart-label">${label}</div>
             </div>
         `;
@@ -922,7 +922,8 @@ function setupEventListeners() {
     if(buttons) {
         buttons.forEach(button => {
             button.addEventListener('click', () => {
-                if (document.getElementById('game-selector').value !== '트릭컬 리바이브') return;
+                const selectedGame = document.getElementById('game-selector').value;
+                if (selectedGame !== '트릭컬 리바이브' && selectedGame !== '트릭컬 글로벌 서버') return;
                 
                 buttons.forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
@@ -934,10 +935,10 @@ function setupEventListeners() {
                 if (filter === 'all') {
                     filteredData = currentGameData;
                 } else if (filter === 'pass_basic') {
-                    const passKeywords = ["리바이브 패스", "트릭컬 패스", "개쩜 패스"];
+                    const passKeywords = ["리바이브 패스", "트릭컬 패스", "개쩜 패스", "Trickcal Pass", "Trickcal Revive Pass"];
                     filteredData = currentGameData.filter(item => passKeywords.some(keyword => item.title.includes(keyword)));
                 } else if (filter === 'pass_sashik') {
-                    filteredData = currentGameData.filter(item => item.title.includes("사복 패스") || item.title.includes("사복패스"));
+                    filteredData = currentGameData.filter(item => item.title.includes("사복 패스") || item.title.includes("사복패스") || item.title.includes("Civvies Pass"));
                 } else {
                     filteredData = currentGameData.filter(item => item.title.includes(filter));
                 }
