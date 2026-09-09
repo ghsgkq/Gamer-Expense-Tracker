@@ -64,8 +64,8 @@
 ├── js/
 │   ├── appKeywords.js      # 게임 이름 분류를 위한 키워드 사전 데이터
 │   ├── parsers.js          # Google/Apple/아이시움 데이터 파싱 및 병합 로직
-│   ├── common.js           # 공통 업데이트 내역 모달 및 UI 로직
-│   ├── main.js             # 메인 대시보드 UI 이벤트 처리 및 차트 렌더링
+│   ├── common.js           # 공용 로직: 파일 업로드·병합, 키워드 저장, 업데이트 모달, 이스케이프
+│   ├── main.js             # 메인 대시보드 상태 관리, 필터링, 차트 렌더링
 │   └── recap.js            # 연말결산 영수증 카드 생성 및 데이터 가공 로직
 └── guide/
     ├── apple_guide.html    # Apple Store 구매 내역 다운로드 가이드 페이지

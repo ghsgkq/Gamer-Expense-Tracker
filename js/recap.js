@@ -1,7 +1,10 @@
-let combinedData = {};
-let rawGoogleData = null;
-let rawAppleData = null;
-let rawIciumData = null;
+// --- 연말결산 화면 상태 ---
+// 업로드된 원본 파일은 js/common.js 의 rawFileData 가 보관합니다.
+const recapState = {
+    combinedData: {},   // { 게임명: [결제내역] }
+    slides: [],         // 생성된 슬라이드 목록
+    slideIndex: 0,      // 현재 슬라이드 위치
+};
 
 // 사복 패스 파일명 매핑
 const knownSashikFiles = {
@@ -20,7 +23,7 @@ const knownSashikFiles = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    setupFileInputListeners();
+    setupFileInputListeners(processData); // js/common.js
     setupUpdateHistoryModal();
     
     const startBtn = document.getElementById('start-recap-btn');
@@ -31,58 +34,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closeBtn) closeBtn.addEventListener('click', () => {
         overlay.classList.add('hidden');
         document.getElementById('recap-content-area').innerHTML = '';
-        currentSlideIndex = 0;
+        recapState.slideIndex = 0;
     });
 });
 
-// --- 1. 파일 업로드 및 데이터 처리 로직 ---
-function setupFileInputListeners() {
-    const googleInput = document.getElementById('googleFileInput');
-    const appleInput = document.getElementById('appleFileInput');
-    const iciumInput = document.getElementById('iciumFileInput');
-    
-    if (googleInput) googleInput.addEventListener('change', (e) => handleFileUpload(e, 'google'));
-    if (appleInput) appleInput.addEventListener('change', (e) => handleFileUpload(e, 'apple'));
-    if (iciumInput) iciumInput.addEventListener('change', (e) => handleFileUpload(e, 'icium'));
-}
-
-function handleFileUpload(event, type) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const fileContent = e.target.result;
-            const statusId = type === 'google' ? 'googleFileStatus' : (type === 'apple' ? 'appleFileStatus' : 'iciumFileStatus');
-            
-            if (type === 'google') {
-                rawGoogleData = JSON.parse(fileContent);
-            } else if (type === 'apple') {
-                rawAppleData = new DOMParser().parseFromString(fileContent, "text/html");
-            } else {
-                rawIciumData = new DOMParser().parseFromString(fileContent, "text/html");
-            }
-            
-            showFileStatus(document.getElementById(statusId), `✅ ${file.name} 준비 완료!`, false);
-            
-            processData(); 
-
-        } catch (error) {
-            const failedStatusId = type === 'google' ? 'googleFileStatus' : (type === 'apple' ? 'appleFileStatus' : 'iciumFileStatus');
-            showFileStatus(document.getElementById(failedStatusId), `⚠️ 파일을 해석할 수 없습니다. 저장 가이드를 확인해주세요. (${error.message})`, true);
-            console.error("파일 처리 오류:", error);
-            event.target.value = '';
-        }
-    };
-    reader.readAsText(file, 'UTF-8');
-}
+// --- 1. 업로드 데이터 처리 로직 ---
 
 function processData() {
-    combinedData = {}; 
-    if (rawGoogleData) mergeData(parseGoogleData(rawGoogleData));
-    if (rawAppleData) mergeData(parseAppleData(rawAppleData));
-    if (rawIciumData) mergeData(parseIciumData(rawIciumData));
+    // 업로드된 원본 파일을 모두 다시 파싱·병합합니다. (js/common.js)
+    recapState.combinedData = buildCombinedData();
 
     // 결산 가능한 연도를 실제 업로드 데이터에서 채웁니다.
     const years = populateRecapYearOptions();
@@ -96,7 +56,7 @@ function processData() {
         } else {
             btn.classList.remove('ready');
             btn.textContent = "🎬 연말결산 시작하기";
-            if (Object.keys(combinedData).length > 0) {
+            if (Object.keys(recapState.combinedData).length > 0) {
                 showRecapStatus("업로드한 파일에서 '트릭컬' 결제 내역을 찾지 못했습니다.", true);
             }
         }
@@ -105,7 +65,7 @@ function processData() {
 
 // 연말결산 대상 데이터. '트릭컬 리바이브'를 우선하고, 없으면 글로벌 서버를 사용합니다.
 function getTrickcalData() {
-    return combinedData['트릭컬 리바이브'] || combinedData['트릭컬 글로벌 서버'] || [];
+    return recapState.combinedData['트릭컬 리바이브'] || recapState.combinedData['트릭컬 글로벌 서버'] || [];
 }
 
 /**
@@ -146,14 +106,7 @@ function showRecapStatus(message, isError) {
     element.classList.toggle('error', !!isError);
 }
 
-function mergeData(newData) {
-    mergePaymentData(combinedData, newData);
-}
-
 // --- 2. 연말결산(Recap) 핵심 로직 ---
-
-let currentSlideIndex = 0;
-let recapSlides = [];
 
 // 상품명 정제 함수
 function cleanTitle(title) {
@@ -257,11 +210,11 @@ function startRecapSequence() {
 
 
     // --- 슬라이드 데이터 구성 ---
-    recapSlides = [];
+    recapState.slides = [];
 
     // 1. 인트로
-    const gameDisplayName = combinedData['트릭컬 글로벌 서버'] && !combinedData['트릭컬 리바이브'] ? '트릭컬 글로벌 서버' : '트릭컬 리바이브';
-    recapSlides.push({
+    const gameDisplayName = recapState.combinedData['트릭컬 글로벌 서버'] && !recapState.combinedData['트릭컬 리바이브'] ? '트릭컬 글로벌 서버' : '트릭컬 리바이브';
+    recapState.slides.push({
         type: 'intro',
         content: `
             <div class="slide-content fade-in-up">
@@ -273,7 +226,7 @@ function startRecapSequence() {
     });
 
     // 2. 총액
-    recapSlides.push({
+    recapState.slides.push({
         type: 'total',
         amount: totalSpent,
         content: `
@@ -287,7 +240,7 @@ function startRecapSequence() {
 
     // 3. 데일리 영수증
     if (Object.values(dailyItems).some(item => item.count > 0)) {
-        recapSlides.push({
+        recapState.slides.push({
             type: 'receipt',
             title: '📜 데일리 공물 영수증',
             data: dailyItems
@@ -297,7 +250,7 @@ function startRecapSequence() {
     // 4. 일반 패스
     const hasBasicPass = Object.values(basicPassMonthly).some(m => m.count > 0);
     if (hasBasicPass) {
-        recapSlides.push({
+        recapState.slides.push({
             type: 'monthly_pass_receipt',
             title: '🎫 월간 패스 기록',
             data: basicPassMonthly,
@@ -307,7 +260,7 @@ function startRecapSequence() {
 
     // 5. 사복 패스 갤러리
     if (sashikCollection.length > 0) {
-        recapSlides.push({
+        recapState.slides.push({
             type: 'sashik_gallery',
             title: '👗 사복 컬렉션',
             items: sashikCollection
@@ -316,7 +269,7 @@ function startRecapSequence() {
 
     // 6. 사복 패스 영수증
     if (sashikCollection.length > 0) {
-        recapSlides.push({
+        recapState.slides.push({
             type: 'monthly_sashik_receipt',
             title: '🧾 사복 패스 영수증',
             data: sashikPassMonthly
@@ -324,7 +277,7 @@ function startRecapSequence() {
     }
 
     // 7. 월별 상세 타임라인 (저장 버튼 기능 포함)
-    recapSlides.push({
+    recapState.slides.push({
         type: 'monthly_timeline',
         title: '🗓️ 월별 공물 납부 내역',
         data: monthlyDetails,
@@ -332,7 +285,7 @@ function startRecapSequence() {
     });
 
     // 8. 최고 지출 월
-    recapSlides.push({
+    recapState.slides.push({
         type: 'max_month_receipt',
         month: maxMonth,
         amount: maxMonthAmount,
@@ -341,7 +294,7 @@ function startRecapSequence() {
     });
 
     // 9. 아웃트로
-    recapSlides.push({
+    recapState.slides.push({
         type: 'outro',
         year: year,
         content: `
@@ -358,7 +311,7 @@ function startRecapSequence() {
 
     showRecapStatus('', false);
     document.getElementById('recap-overlay').classList.remove('hidden');
-    currentSlideIndex = 0;
+    recapState.slideIndex = 0;
     showSlide(0);
 }
 
@@ -382,9 +335,10 @@ function getSashikImageHTML(title, isCard = false) {
 
     return `
         <div class="${wrapperClass}">
-            <img src="${imgSrc}" 
-                 onerror="this.onerror=null; this.src='${fallbackSrc}';" 
-                 alt="${cleanName}" 
+            <img src="${escapeHtml(imgSrc)}" 
+                 data-fallback="${escapeHtml(fallbackSrc)}" 
+                 onerror="this.onerror=null; this.src=this.dataset.fallback;" 
+                 alt="${escapeHtml(cleanName)}" 
                  class="${className}">
         </div>
     `;
@@ -408,7 +362,7 @@ function getPremiumBadgeHTML(year, month) {
 
 function showSlide(index) {
     const container = document.getElementById('recap-content-area');
-    const slide = recapSlides[index];
+    const slide = recapState.slides[index];
     
     if (!slide) return;
 
@@ -464,7 +418,7 @@ function showSlide(index) {
                     ${imgHtml}
                     <div class="sashik-card-info">
                         <span class="sashik-month">${month}월</span>
-                        <span class="sashik-name">${item.title}</span>
+                        <span class="sashik-name">${escapeHtml(item.title)}</span>
                     </div>
                 </div>
             `;
@@ -491,7 +445,7 @@ function showSlide(index) {
                         <div class="receipt-row sashik-row">
                             <div class="sashik-info">
                                 ${imageHTML}
-                                <span class="name">${item.title}</span>
+                                <span class="name">${escapeHtml(item.title)}</span>
                             </div>
                             <span class="price">₩${item.price.toLocaleString()}</span>
                         </div>`;
@@ -512,7 +466,7 @@ function showSlide(index) {
                 slide.data[m].forEach(item => {
                     rows += `
                         <div class="receipt-row">
-                            <span class="name" style="font-size:0.85em;">${item.name}</span>
+                            <span class="name" style="font-size:0.85em;">${escapeHtml(item.name)}</span>
                             <span class="price">₩${item.price.toLocaleString()}</span>
                         </div>`;
                 });
@@ -526,7 +480,7 @@ function showSlide(index) {
         slide.items.forEach(item => {
             rows += `
                 <div class="receipt-row">
-                    <span class="name" style="font-size:0.9em;">${item.name}</span>
+                    <span class="name" style="font-size:0.9em;">${escapeHtml(item.name)}</span>
                     <span class="price">₩${item.price.toLocaleString()}</span>
                 </div>`;
         });
@@ -563,8 +517,8 @@ function showSlide(index) {
     const nextBtn = document.getElementById('next-slide-btn');
     if (nextBtn) {
         nextBtn.addEventListener('click', () => {
-            currentSlideIndex++;
-            showSlide(currentSlideIndex);
+            recapState.slideIndex++;
+            showSlide(recapState.slideIndex);
         });
     }
 }
@@ -607,7 +561,7 @@ function animateValue(id, start, end, duration) {
 // 영수증 이미지 저장 
 window.downloadLongReceipt = function() {
     // 1. 월별 내역 슬라이드 데이터 찾기
-    const timelineSlide = recapSlides.find(s => s.type === 'monthly_timeline');
+    const timelineSlide = recapState.slides.find(s => s.type === 'monthly_timeline');
     if (!timelineSlide) {
         alert("저장할 데이터가 없습니다.");
         return;
@@ -626,7 +580,7 @@ window.downloadLongReceipt = function() {
             data[m].forEach(item => {
                 rows += `
                     <div class="receipt-row">
-                        <span class="name" style="font-size:0.85em;">${item.name}</span>
+                        <span class="name" style="font-size:0.85em;">${escapeHtml(item.name)}</span>
                         <span class="price">₩${item.price.toLocaleString()}</span>
                     </div>`;
             });
