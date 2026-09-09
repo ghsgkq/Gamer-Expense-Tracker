@@ -87,6 +87,7 @@
                 <p>
             Google Takeout의 <strong>'Order History.json'</strong> (<a href="guide/guide.html" target="_blank">파일 다운로드 가이드 보기</a>)<br>
             Apple '문제 신고' 페이지의 <strong>HTML</strong> (<a href="guide/apple_guide.html" target="_blank">파일 다운로드 가이드 보기</a>)<br>
+            아이시움 라운지의 <strong>HTML</strong> (<a href="guide/icium_guide.html" target="_blank">파일 저장 가이드 보기</a>)<br>
             파일을 업로드하여 결제 내역을 통합 분석하세요.
         </p>
 
@@ -100,7 +101,7 @@
             <div class="year-select-wrapper">
                 <label for="year-select">📅 결산 연도 선택:</label>
                 <select id="year-select">
-                    <option value="2025" selected>2025년</option>
+                    <option value="">파일 업로드 후 선택</option>
                 </select>
             </div>
             
@@ -115,9 +116,15 @@
                     <input type="file" id="appleFileInput" accept=".html, .htm">
                     <span id="appleFileStatus" class="file-status"></span>
                 </div>
+                <div class="upload-box">
+                    <label for="iciumFileInput"><strong>아이시움 라운지 (.html)</strong></label>
+                    <input type="file" id="iciumFileInput" accept=".html, .htm">
+                    <span id="iciumFileStatus" class="file-status"></span>
+                </div>
             </div>
 
             <button id="start-recap-btn" class="start-btn" disabled>🎬 연말결산 시작하기</button>
+            <p id="recap-status" class="inline-message"></p>
             <p class="hint-text">* 파일은 서버에 전송되지 않고 브라우저에서만 처리됩니다.</p>
         </div>
         

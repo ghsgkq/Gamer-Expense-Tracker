@@ -1121,3 +1121,28 @@ td:last-child { text-align: right; font-weight: 500; }
 #exportGameExcelButton:hover {
     background-color: #2980b9;
 }
+
+/* --- 인라인 상태/오류 메시지 --- */
+.file-status.error {
+    color: #e74c3c;
+}
+
+.inline-message {
+    margin: 8px 0 0;
+    min-height: 1.2em;
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #27ae60;
+}
+
+.inline-message.error {
+    color: #e74c3c;
+}
+
+#reset-keyword-btn {
+    background-color: #95a5a6;
+}
+
+#reset-keyword-btn:hover {
+    background-color: #7f8c8d;
+}
