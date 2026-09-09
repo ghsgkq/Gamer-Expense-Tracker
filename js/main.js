@@ -42,23 +42,22 @@ function handleFileUpload(event, type) {
     reader.onload = function(e) {
         try {
             const fileContent = e.target.result;
-            let newData;
             let statusElementId = type === 'google' ? 'googleFileStatus' : (type === 'apple' ? 'appleFileStatus' : 'iciumFileStatus');
             let statusElement = document.getElementById(statusElementId);
 
             if (type === 'google' && file.name.endsWith('.json')) {
                 rawGoogleData = JSON.parse(fileContent);
-                if (statusElement) statusElement.textContent = `✅ ${file.name} 로드됨`;
+                showFileStatus(statusElement, `✅ ${file.name} 로드됨`, false);
             } else if (type === 'apple' && (file.name.endsWith('.html') || file.name.endsWith('.htm'))) {
                 const parser = new DOMParser();
                 rawAppleData = parser.parseFromString(fileContent, "text/html");
-                if (statusElement) statusElement.textContent = `✅ ${file.name} 로드됨`;
+                showFileStatus(statusElement, `✅ ${file.name} 로드됨`, false);
             } else if (type === 'icium' && (file.name.endsWith('.html') || file.name.endsWith('.htm'))) {
                 const parser = new DOMParser();
                 rawIciumData = parser.parseFromString(fileContent, "text/html");
-                if (statusElement) statusElement.textContent = `✅ ${file.name} 로드됨`;
+                showFileStatus(statusElement, `✅ ${file.name} 로드됨`, false);
             } else {
-                alert('잘못된 파일 형식입니다. .json 또는 .html 파일을 업로드해주세요.');
+                showFileStatus(statusElement, '⚠️ 지원하지 않는 형식입니다. (Google: .json / Apple·아이시움: .html)', true);
                 event.target.value = ''; // 파일 선택 초기화
                 return;
             }
@@ -66,8 +65,10 @@ function handleFileUpload(event, type) {
             reprocessAllData();
 
         } catch (error) {
-            alert('파일을 처리하는 중 오류가 발생했습니다. 파일 형식이 올바른지 확인해주세요.');
+            const failedStatusId = type === 'google' ? 'googleFileStatus' : (type === 'apple' ? 'appleFileStatus' : 'iciumFileStatus');
+            showFileStatus(document.getElementById(failedStatusId), `⚠️ 파일을 해석할 수 없습니다. 저장 가이드를 확인해주세요. (${error.message})`, true);
             console.error("파일 처리 오류:", error);
+            event.target.value = '';
         }
     };
     reader.readAsText(file, 'UTF-8');
@@ -528,20 +529,20 @@ function displayMonthlyChart(monthlyData, currency) {
 
 function displayFullHistory(data, currency) {
     const table = document.getElementById('details-table');
+    // 통화 필터를 먼저 적용해야 '내역 없음' 안내가 정확하게 표시됩니다.
+    const rows = data.filter(item => item.currency === currency).reverse();
     let tableHTML = `<thead><tr><th>날짜</th><th>상품명</th><th>결제 금액</th></tr></thead><tbody>`;
-    if (data.length === 0) {
+    if (rows.length === 0) {
         tableHTML += `<tr><td colspan="3" style="text-align:center;">표시할 내역이 없습니다.</td></tr>`;
     } else {
-        [...data].reverse()
-                 .filter(item => item.currency === currency)
-                 .forEach(item => {
-                    tableHTML += `
-                        <tr>
-                            <td data-label="날짜">${getLocalDateString(item.date)}</td>
-                            <td data-label="상품명">${item.title}</td>
-                            <td data-label="결제 금액">${currency}${item.price.toLocaleString()}</td>
-                        </tr>
-                    `;
+        rows.forEach(item => {
+            tableHTML += `
+                <tr>
+                    <td data-label="날짜">${getLocalDateString(item.date)}</td>
+                    <td data-label="상품명">${item.title}</td>
+                    <td data-label="결제 금액">${currency}${item.price.toLocaleString()}</td>
+                </tr>
+            `;
         });
     }
     table.innerHTML = tableHTML + `</tbody>`;
@@ -568,6 +569,11 @@ function displayCurrencyOptions() {
     if (uniqueCurrencies.length === 0) {
         currencySelect.classList.add('hidden');
         return;
+    }
+
+    // 이전에 선택한 통화가 여전히 존재하면 그대로 유지합니다.
+    if (prevValue && uniqueCurrencies.includes(prevValue)) {
+        select.value = prevValue;
     }
 
     currencySelect.classList.remove('hidden');
@@ -940,7 +946,9 @@ function setupEventListeners() {
                 } else if (filter === 'pass_sashik') {
                     filteredData = currentGameData.filter(item => item.title.includes("사복 패스") || item.title.includes("사복패스") || item.title.includes("Civvies Pass"));
                 } else {
-                    filteredData = currentGameData.filter(item => item.title.includes(filter));
+                    // data-filter-keywords가 있으면 한글/영문 상품명을 모두 인식합니다.
+                    const keywords = (button.dataset.filterKeywords || filter).split(',').map(k => k.trim()).filter(k => k);
+                    filteredData = currentGameData.filter(item => keywords.some(keyword => item.title.includes(keyword)));
                 }
                 displayFullHistory(filteredData, document.getElementById('currency-select').value);
             });
@@ -1035,9 +1043,7 @@ function resetAllData() {
 }
 
 function switchAppMode(mode) {
-    // 탭 변경 시 데이터 초기화 (사용자 요청 사항)
-    resetAllData();
-
+    // 탭을 옮겨도 업로드한 데이터는 유지합니다. (전체 삭제는 '초기화' 버튼으로만)
     appMode = mode;
     
     // URL 해시 업데이트 (페이지 새로고침 없이 상태 유지)
@@ -1081,7 +1087,7 @@ function switchAppMode(mode) {
         mainTitle.innerHTML = '🎮 게이머 가계부 🍎 (통합)';
     }
 
-    // 데이터 재처리 (이미 데이터가 있는 경우 현재 모드에 맞춰 UI 갱신)
+    // 보관 중인 데이터를 현재 모드 기준으로 다시 렌더링합니다.
     if (Object.keys(combinedData).length > 0) {
         updateUI();
     }
@@ -1101,7 +1107,7 @@ function setupKeywordManagement() {
         const keywords = keywordsInput.value.trim();
 
         if (!appName || !keywords) {
-            alert('앱 이름과 키워드를 모두 입력해주세요.');
+            showKeywordMessage('앱 이름과 키워드를 모두 입력해주세요.', true);
             return;
         }
 
@@ -1120,8 +1126,20 @@ function setupKeywordManagement() {
         appNameInput.value = '';
         keywordsInput.value = '';
 
+        saveKeywordOverrides();
+        showKeywordMessage(`'${appName}' 키워드 ${keywordArray.length}개를 적용했습니다. (이 브라우저에 저장됨)`, false);
         reprocessAllData();
     });
+
+    const resetKeywordBtn = document.getElementById('reset-keyword-btn');
+    if (resetKeywordBtn) {
+        resetKeywordBtn.addEventListener('click', () => {
+            if (!confirm('직접 추가·삭제한 키워드 설정을 모두 지우고 기본 사전으로 되돌립니다. 계속할까요?')) return;
+            resetKeywordOverrides();
+            showKeywordMessage('키워드를 기본값으로 되돌렸습니다.', false);
+            reprocessAllData();
+        });
+    }
 
     keywordsList.addEventListener('click', (event) => {
         const target = event.target;
@@ -1142,6 +1160,8 @@ function setupKeywordManagement() {
                 delete appKeywords[appName];
             }
             
+            saveKeywordOverrides();
+            showKeywordMessage(keyword ? `'${keyword}' 키워드를 삭제했습니다.` : `'${appName}' 앱을 목록에서 삭제했습니다.`, false);
             reprocessAllData();
         }
     });
@@ -1150,6 +1170,14 @@ function setupKeywordManagement() {
         const searchTerm = e.target.value.toLowerCase();
         displayCurrentKeywords(searchTerm);
     });
+}
+
+// 키워드 관리 폼의 안내/오류 메시지를 인라인으로 표시합니다.
+function showKeywordMessage(message, isError) {
+    const element = document.getElementById('keyword-form-message');
+    if (!element) return;
+    element.textContent = message;
+    element.classList.toggle('error', !!isError);
 }
 
 function displayCurrentKeywords(searchTerm = '') {

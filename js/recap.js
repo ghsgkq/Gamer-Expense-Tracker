@@ -1,6 +1,7 @@
 let combinedData = {};
 let rawGoogleData = null;
 let rawAppleData = null;
+let rawIciumData = null;
 
 // 사복 패스 파일명 매핑
 const knownSashikFiles = {
@@ -38,9 +39,11 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupFileInputListeners() {
     const googleInput = document.getElementById('googleFileInput');
     const appleInput = document.getElementById('appleFileInput');
+    const iciumInput = document.getElementById('iciumFileInput');
     
     if (googleInput) googleInput.addEventListener('change', (e) => handleFileUpload(e, 'google'));
     if (appleInput) appleInput.addEventListener('change', (e) => handleFileUpload(e, 'apple'));
+    if (iciumInput) iciumInput.addEventListener('change', (e) => handleFileUpload(e, 'icium'));
 }
 
 function handleFileUpload(event, type) {
@@ -51,23 +54,25 @@ function handleFileUpload(event, type) {
     reader.onload = function(e) {
         try {
             const fileContent = e.target.result;
-            const statusId = type === 'google' ? 'googleFileStatus' : 'appleFileStatus';
+            const statusId = type === 'google' ? 'googleFileStatus' : (type === 'apple' ? 'appleFileStatus' : 'iciumFileStatus');
             
             if (type === 'google') {
                 rawGoogleData = JSON.parse(fileContent);
+            } else if (type === 'apple') {
+                rawAppleData = new DOMParser().parseFromString(fileContent, "text/html");
             } else {
-                const parser = new DOMParser();
-                rawAppleData = parser.parseFromString(fileContent, "text/html");
+                rawIciumData = new DOMParser().parseFromString(fileContent, "text/html");
             }
             
-            const statusElem = document.getElementById(statusId);
-            if(statusElem) statusElem.textContent = `✅ ${file.name} 준비 완료!`;
+            showFileStatus(document.getElementById(statusId), `✅ ${file.name} 준비 완료!`, false);
             
             processData(); 
 
         } catch (error) {
-            alert('파일 처리 중 오류가 발생했습니다.');
-            console.error(error);
+            const failedStatusId = type === 'google' ? 'googleFileStatus' : (type === 'apple' ? 'appleFileStatus' : 'iciumFileStatus');
+            showFileStatus(document.getElementById(failedStatusId), `⚠️ 파일을 해석할 수 없습니다. 저장 가이드를 확인해주세요. (${error.message})`, true);
+            console.error("파일 처리 오류:", error);
+            event.target.value = '';
         }
     };
     reader.readAsText(file, 'UTF-8');
@@ -77,16 +82,68 @@ function processData() {
     combinedData = {}; 
     if (rawGoogleData) mergeData(parseGoogleData(rawGoogleData));
     if (rawAppleData) mergeData(parseAppleData(rawAppleData));
+    if (rawIciumData) mergeData(parseIciumData(rawIciumData));
 
-    const hasData = Object.keys(combinedData).length > 0;
+    // 결산 가능한 연도를 실제 업로드 데이터에서 채웁니다.
+    const years = populateRecapYearOptions();
     const btn = document.getElementById('start-recap-btn');
     if (btn) {
-        btn.disabled = !hasData;
-        if (hasData) {
+        btn.disabled = years.length === 0;
+        if (years.length > 0) {
             btn.classList.add('ready');
             btn.textContent = "🎬 연말결산 시작하기 (준비됨!)";
+            showRecapStatus('', false);
+        } else {
+            btn.classList.remove('ready');
+            btn.textContent = "🎬 연말결산 시작하기";
+            if (Object.keys(combinedData).length > 0) {
+                showRecapStatus("업로드한 파일에서 '트릭컬' 결제 내역을 찾지 못했습니다.", true);
+            }
         }
     }
+}
+
+// 연말결산 대상 데이터. '트릭컬 리바이브'를 우선하고, 없으면 글로벌 서버를 사용합니다.
+function getTrickcalData() {
+    return combinedData['트릭컬 리바이브'] || combinedData['트릭컬 글로벌 서버'] || [];
+}
+
+/**
+ * 업로드된 트릭컬 결제 내역에 존재하는 연도만 선택 목록에 채우고, 그 목록을 반환합니다.
+ */
+function populateRecapYearOptions() {
+    const years = [...new Set(getTrickcalData().map(item => item.date.getFullYear()))].sort((a, b) => b - a);
+    const select = document.getElementById('year-select');
+    if (!select) return years;
+
+    const prevValue = select.value;
+    select.innerHTML = '';
+
+    if (years.length === 0) {
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = '파일 업로드 후 선택';
+        select.appendChild(placeholder);
+        return years;
+    }
+
+    years.forEach(year => {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = `${year}년`;
+        select.appendChild(option);
+    });
+    select.value = years.includes(parseInt(prevValue)) ? prevValue : String(years[0]);
+
+    return years;
+}
+
+// 연말결산 화면의 안내/오류 메시지를 인라인으로 표시합니다.
+function showRecapStatus(message, isError) {
+    const element = document.getElementById('recap-status');
+    if (!element) return;
+    element.textContent = message;
+    element.classList.toggle('error', !!isError);
 }
 
 function mergeData(newData) {
@@ -111,10 +168,15 @@ function startRecapSequence() {
     const yearSelect = document.getElementById('year-select');
     const year = parseInt(yearSelect.value);
     
-    const trickcalData = combinedData['트릭컬 리바이브'] || combinedData['트릭컬 글로벌 서버'];
+    const trickcalData = getTrickcalData();
 
-    if (!trickcalData) {
-        alert("업로드된 파일에서 '트릭컬' 관련 결제 내역을 찾을 수 없습니다! 😭");
+    if (trickcalData.length === 0) {
+        showRecapStatus("업로드한 파일에서 '트릭컬' 관련 결제 내역을 찾을 수 없습니다. 😭", true);
+        return;
+    }
+
+    if (!year) {
+        showRecapStatus('결산할 연도를 선택해주세요.', true);
         return;
     }
 
@@ -123,7 +185,7 @@ function startRecapSequence() {
         .sort((a, b) => a.date - b.date);
 
     if (yearData.length === 0) {
-        alert(`${year}년에는 트릭컬 결제 내역이 없습니다.`);
+        showRecapStatus(`${year}년에는 트릭컬 결제 내역이 없습니다.`, true);
         return;
     }
 
@@ -294,6 +356,7 @@ function startRecapSequence() {
         `
     });
 
+    showRecapStatus('', false);
     document.getElementById('recap-overlay').classList.remove('hidden');
     currentSlideIndex = 0;
     showSlide(0);
