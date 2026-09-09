@@ -1,9 +1,25 @@
 // --- 공용 헬퍼 함수 ---
+
+// 시간대 정보가 없는 년/월/일을 현지 시간 자정 기준 Date로 만듭니다.
+// 세 파서가 모두 이 함수를 사용해 동일한 형태의 날짜 값을 만듭니다.
+function createDateOnly(year, month, day) {
+    return new Date(Number(year), Number(month) - 1, Number(day));
+}
+
+// UTC 타임스탬프를 한국(KST, UTC+9) 달력 날짜로 변환합니다.
+// 타임스탬프를 제공하는 것은 Google 결제 내역뿐이며, 브라우저 시간대와 무관하게
+// 한국 기준 날짜로 고정하기 위해 사용합니다.
+// (Apple·아이시움은 이미 '표시된 날짜' 문자열이므로 그대로 사용합니다.)
+function toKoreanStoreDate(timestamp) {
+    const shifted = new Date(new Date(timestamp).getTime() + 9 * 60 * 60 * 1000);
+    return createDateOnly(shifted.getUTCFullYear(), shifted.getUTCMonth() + 1, shifted.getUTCDate());
+}
+
 // 'YYYY년 MM월 DD일' 형식의 날짜 문자열을 Date 객체로 변환합니다.
 function parseKoreanDate(dateStr) {
     const parts = dateStr.match(/(\d{4})년 (\d{1,2})월 (\d{1,2})일/);
     if (!parts) return null;
-    return new Date(parts[1], parts[2] - 1, parts[3]);
+    return createDateOnly(parts[1], parts[2], parts[3]);
 }
 
 // 상품명과 퍼블리셔 정보를 바탕으로 표준화된 앱/게임 이름을 반환합니다.
@@ -54,15 +70,8 @@ function parseGoogleData(orders) {
         
         const title = order.lineItem[0].doc.title || "";
         
-        // [수정됨] UTC 시간을 한국 시간(KST, UTC+9) 기준으로 명확하게 변환
-        // 브라우저의 로컬 시간대에 상관없이 한국 날짜로 고정합니다.
-        const utcDate = new Date(order.creationTime);
-        const kstOffset = 9 * 60 * 60 * 1000; // 9시간 (밀리초)
-        const kstDate = new Date(utcDate.getTime() + kstOffset);
-        
-        // KST 기준의 년, 월, 일을 사용하여 Date 객체 생성 (시간은 00:00:00)
-        // getUTCFullYear() 등을 사용하여 변환된 타임스탬프의 UTC 값을 가져오면 KST 날짜가 됨
-        const date = new Date(kstDate.getUTCFullYear(), kstDate.getUTCMonth(), kstDate.getUTCDate());
+        // 브라우저 시간대와 무관하게 한국 기준 날짜로 고정합니다.
+        const date = toKoreanStoreDate(order.creationTime);
 
         const appName = getAppName(title, title);
         
@@ -146,7 +155,7 @@ function parseIciumData(doc) {
         // '2024. 12. 30.' 또는 '2024.12.30' 형식 파싱
         const dateParts = orderDateStr?.match(/(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})/);
         if (!dateParts) return;
-        const date = new Date(dateParts[1], dateParts[2] - 1, dateParts[3]);
+        const date = createDateOnly(dateParts[1], dateParts[2], dateParts[3]);
 
         const title = card.querySelector('.overflow-hidden.text-ellipsis')?.textContent.trim();
 

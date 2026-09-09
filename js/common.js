@@ -185,3 +185,93 @@ function resetKeywordOverrides() {
 
 // 스크립트 로드 순서상 appKeywords.js 다음이므로 이 시점에 바로 적용합니다.
 loadKeywordOverrides();
+
+// --- 문자열 이스케이프 ---
+
+/**
+ * 업로드 파일에서 읽은 문자열(상품명 등)을 HTML에 넣기 전에 이스케이프합니다.
+ * 텍스트/속성 양쪽 모두에 안전하도록 따옴표까지 변환합니다.
+ */
+function escapeHtml(value) {
+    if (value === null || value === undefined) return '';
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+// --- 업로드 파일 관리 (index.html / recap.html 공용) ---
+
+const UPLOAD_INPUT_IDS = { google: 'googleFileInput', apple: 'appleFileInput', icium: 'iciumFileInput' };
+const UPLOAD_STATUS_IDS = { google: 'googleFileStatus', apple: 'appleFileStatus', icium: 'iciumFileStatus' };
+
+// 업로드된 원본 파일 데이터. 키워드를 바꿔도 다시 파싱할 수 있도록 보관합니다.
+let rawFileData = { google: null, apple: null, icium: null };
+
+/**
+ * 페이지에 존재하는 업로드 입력칸에 변경 리스너를 연결합니다.
+ * onDataChanged: 파일이 새로 적재된 뒤 호출할 콜백(각 페이지의 재처리 함수)
+ */
+function setupFileInputListeners(onDataChanged) {
+    Object.keys(UPLOAD_INPUT_IDS).forEach(type => {
+        const input = document.getElementById(UPLOAD_INPUT_IDS[type]);
+        if (input) input.addEventListener('change', event => handleFileUpload(event, type, onDataChanged));
+    });
+}
+
+function handleFileUpload(event, type, onDataChanged) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const statusElement = document.getElementById(UPLOAD_STATUS_IDS[type]);
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        try {
+            if (type === 'google' && /\.json$/i.test(file.name)) {
+                rawFileData.google = JSON.parse(e.target.result);
+            } else if (type !== 'google' && /\.html?$/i.test(file.name)) {
+                rawFileData[type] = new DOMParser().parseFromString(e.target.result, "text/html");
+            } else {
+                showFileStatus(statusElement, '⚠️ 지원하지 않는 형식입니다. (Google: .json / Apple·아이시움: .html)', true);
+                event.target.value = '';
+                return;
+            }
+
+            showFileStatus(statusElement, `✅ ${file.name} 로드됨`, false);
+            if (typeof onDataChanged === 'function') onDataChanged();
+
+        } catch (error) {
+            showFileStatus(statusElement, `⚠️ 파일을 해석할 수 없습니다. 저장 가이드를 확인해주세요. (${error.message})`, true);
+            console.error("파일 처리 오류:", error);
+            event.target.value = '';
+        }
+    };
+
+    reader.readAsText(file, 'UTF-8');
+}
+
+/**
+ * 보관 중인 원본 파일을 모두 파싱·병합해 { 게임명: [결제내역] } 을 새로 만듭니다.
+ */
+function buildCombinedData() {
+    const combined = {};
+    if (rawFileData.google) mergePaymentData(combined, parseGoogleData(rawFileData.google));
+    if (rawFileData.apple) mergePaymentData(combined, parseAppleData(rawFileData.apple));
+    if (rawFileData.icium) mergePaymentData(combined, parseIciumData(rawFileData.icium));
+    return combined;
+}
+
+/**
+ * 업로드된 원본 데이터와 입력칸 상태를 모두 비웁니다.
+ */
+function clearRawFileData() {
+    rawFileData = { google: null, apple: null, icium: null };
+    Object.keys(UPLOAD_INPUT_IDS).forEach(type => {
+        const input = document.getElementById(UPLOAD_INPUT_IDS[type]);
+        if (input) input.value = '';
+        showFileStatus(document.getElementById(UPLOAD_STATUS_IDS[type]), '', false);
+    });
+}
