@@ -30,25 +30,36 @@ function setupUpdateHistoryModal() {
 }
 
 /**
- * updates.json에서 공지사항을 비동기로 로드하여 모달 영역에 렌더링합니다.
+ * HTTP에서는 원본 JSON, 파일 직접 열기에서는 생성된 스크립트 데이터로 공지를 표시합니다.
  */
 async function loadUpdateHistory() {
     const container = document.getElementById("updateLogContainer");
     if (!container) return;
 
     try {
-        const response = await fetch('updates.json');
-        if (!response.ok) throw new Error('Network response was not ok');
-        const updates = await response.json();
+        let updates;
+        if (globalThis.location?.protocol !== 'file:') {
+            try {
+                const response = await fetch('updates.json', { cache: 'no-cache' });
+                if (!response.ok) throw new Error('Update history unavailable');
+                updates = await response.json();
+            } catch {
+                updates = globalThis.GAMER_UPDATE_HISTORY;
+            }
+        } else {
+            // file://에서 JSON fetch가 차단되므로 일반 스크립트로 읽은 공개 공지를 사용합니다.
+            updates = globalThis.GAMER_UPDATE_HISTORY;
+        }
+        if (!Array.isArray(updates)) throw new Error('Update history unavailable');
 
         let html = '';
         updates.forEach(update => {
             html += `
                 <div class="update-item">
-                    <span class="update-date">${update.date}</span>
-                    <span class="update-title">${update.title}</span>
+                    <span class="update-date">${escapeHtml(update.date)}</span>
+                    <span class="update-title">${escapeHtml(update.title)}</span>
                     <ul class="update-list">
-                        ${update.items.map(item => `<li>${item}</li>`).join('')}
+                        ${update.items.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
                     </ul>
                 </div>
             `;
