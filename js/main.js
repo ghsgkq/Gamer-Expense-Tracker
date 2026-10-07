@@ -247,6 +247,7 @@ function populateGameSelector() {
     });
 
     if (sortedGames.length === 0) {
+        TrickcalInventory.hide();
         selectorSection.classList.add('hidden');
         // 전체 요약 및 통계는 연도 필터와 별개로 유지하거나 필요시 숨김 처리 가능
         // 여기서는 앱/게임 상세 분석이 없으므로 하단 섹션들을 숨김
@@ -277,6 +278,16 @@ function updateDisplayForGame(gameName) {
     const currency = document.getElementById('currency-select').value;
     // 탭·연도 조건을 적용한 해당 게임의 내역
     state.currentGameData = getFilteredData({ applyYear: true })[gameName] || [];
+    if (gameName === '트릭컬 리바이브' && TrickcalProducts.status === 'idle') {
+        TrickcalProducts.load();
+    }
+    if (gameName === '트릭컬 리바이브') {
+        const period = state.selectedYear === 'all' ? '전체 기간' : `${state.selectedYear}년`;
+        const platform = { all: '모든 스토어', google: 'Google Play', apple: 'Apple Store' }[state.appMode];
+        TrickcalInventory.show(state.currentGameData.filter(item => item.currency === currency), `${period} · ${platform} · ${currency}`);
+    } else {
+        TrickcalInventory.hide();
+    }
     
     displaySummary(state.currentGameData, currency);
     
@@ -362,6 +373,7 @@ function displayIciumReport(data, currency) {
 }
 
 function displayMonthlyReport(data, currency) {
+    const showProducts = document.getElementById('game-selector').value === '트릭컬 리바이브';
     const monthlyTotals = {};
     data.filter(item => item.currency === currency)
         .forEach(item => {
@@ -386,7 +398,7 @@ function displayMonthlyReport(data, currency) {
             detailsHTML += `
                 <tr>
                     <td data-label="날짜">${getLocalDateString(item.date)}</td>
-                    <td data-label="상품명">${escapeHtml(item.title)}</td>
+                    <td data-label="상품명"${showProducts ? ' class="product-title-cell"' : ''}>${escapeHtml(item.title)}${showProducts ? TrickcalProducts.render(item) : ''}</td>
                     <td data-label="금액">${currency}${item.price.toLocaleString()}</td>
                 </tr>
             `;
@@ -449,6 +461,7 @@ function displayMonthlyChart(monthlyData, currency) {
 
 function displayFullHistory(data, currency) {
     const table = document.getElementById('details-table');
+    const showProducts = document.getElementById('game-selector').value === '트릭컬 리바이브';
     // 통화 필터를 먼저 적용해야 '내역 없음' 안내가 정확하게 표시됩니다.
     const rows = data.filter(item => item.currency === currency).reverse();
     let tableHTML = `<thead><tr><th>날짜</th><th>상품명</th><th>결제 금액</th></tr></thead><tbody>`;
@@ -459,7 +472,7 @@ function displayFullHistory(data, currency) {
             tableHTML += `
                 <tr>
                     <td data-label="날짜">${getLocalDateString(item.date)}</td>
-                    <td data-label="상품명">${escapeHtml(item.title)}</td>
+                    <td data-label="상품명"${showProducts ? ' class="product-title-cell"' : ''}>${escapeHtml(item.title)}${showProducts ? TrickcalProducts.render(item) : ''}</td>
                     <td data-label="결제 금액">${currency}${item.price.toLocaleString()}</td>
                 </tr>
             `;
@@ -912,6 +925,7 @@ function setupEventListeners() {
 }
 
 function resetAllData() {
+    TrickcalInventory.hide();
     // 전역 데이터 초기화
     state.combinedData = {};
     state.currentGameData = [];
@@ -1126,6 +1140,8 @@ function displayCurrentKeywords(searchTerm = '') {
 
 // 초기 로드 시 이벤트 리스너 설정
 document.addEventListener('DOMContentLoaded', () => {
+    TrickcalInventory.setup();
+    TrickcalProducts.setup(() => TrickcalInventory.refresh());
     setupFileInputListeners(reprocessAllData); // js/common.js
     setupEventListeners();
     setupKeywordManagement();
@@ -1244,4 +1260,3 @@ function downloadDataToExcel(data, filename, isAll) {
     // 6. 파일 쓰기 및 다운로드
     XLSX.writeFile(workbook, filename);
 }
-

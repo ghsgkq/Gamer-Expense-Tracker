@@ -1,0 +1,5 @@
+.DS_Store
+
+# 개인 결제 원본은 저장소에 포함하지 않습니다.
+[Oo]rder [Hh]istory*.json
+Takeout/

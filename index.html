@@ -159,6 +159,35 @@
             <div id="overall-summary" class="summary-box"></div>
             <div id="top-spender-summary" class="summary-box secondary"></div>
         </div>
+
+        <section id="trickcal-inventory-section" class="inventory-section hidden" aria-labelledby="inventory-title">
+            <div class="inventory-heading">
+                <h2 id="inventory-title">🎒 나의 누적 보물창고 <span class="inventory-beta-badge">베타</span></h2>
+                <span class="inventory-game-badge">트릭컬 리바이브</span>
+            </div>
+            <p id="inventory-context" class="inventory-context"></p>
+            <p class="inventory-beta-notice"><strong>베타 기능 안내</strong> · 상품 매핑이나 수량 합산이 실제 구매·수령 내역과 맞지 않는 부분이 있을 수 있습니다. 참고용으로 확인해주세요.</p>
+            <p class="inventory-description">결제 내역 속 구성품을 한곳에 모았어요! 상품 목록 기준의 추정 합계이며, 패스 단계 보상은 전체 달성 기준입니다.</p>
+            <div id="inventory-summary" aria-live="polite"></div>
+            <div id="inventory-featured" class="inventory-featured"></div>
+            <p id="inventory-notes" class="inventory-notes hidden"></p>
+            <details id="inventory-all" class="inventory-all">
+                <summary id="inventory-all-title">전체 구성품 보기</summary>
+                <div class="inventory-controls">
+                    <input id="inventory-search" type="search" placeholder="아이템 이름 검색" aria-label="누적 구성품 검색">
+                    <select id="inventory-sort" aria-label="누적 구성품 정렬">
+                        <option value="quantity">수량 많은 순</option>
+                        <option value="name">이름 순</option>
+                    </select>
+                </div>
+                <p id="inventory-search-count" class="inventory-notes" aria-live="polite"></p>
+                <div id="inventory-items" class="inventory-items"></div>
+            </details>
+            <details id="inventory-omitted" class="inventory-omitted hidden">
+                <summary id="inventory-omitted-title">합산에서 제외한 결제 확인</summary>
+                <ul id="inventory-omitted-list"></ul>
+            </details>
+        </section>
         
         <!-- 전체 통계 차트 섹션 -->
         <div id="overall-stats-section" class="hidden">
@@ -239,6 +268,10 @@
             </div>
             <table id="details-table"></table>
         </div>
+        <footer class="site-footer">
+            <p>문의사항·오류 제보: <a href="mailto:ckdgus5820@gmail.com">ckdgus5820@gmail.com</a></p>
+            <p><a href="https://github.com/ghsgkq/Gamer-Expense-Tracker" target="_blank" rel="noopener noreferrer">GitHub · Gamer-Expense-Tracker</a></p>
+        </footer>
     </div>
 
     <!-- Update History Modal -->
@@ -254,8 +287,10 @@
     
     <script src="js/appKeywords.js"></script>
     <script src="js/parsers.js"></script>
+    <script src="js/updateHistoryData.js"></script>
     <script src="js/common.js"></script>
+    <script src="js/trickcalProducts.js"></script>
+    <script src="js/trickcalInventory.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
-
