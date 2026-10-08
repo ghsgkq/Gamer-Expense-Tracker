@@ -213,7 +213,7 @@ function escapeHtml(value) {
         .replace(/'/g, '&#39;');
 }
 
-// --- 업로드 파일 관리 (index.html / recap.html 공용) ---
+// --- 업로드 파일 관리 ---
 
 const UPLOAD_INPUT_IDS = { google: 'googleFileInput', apple: 'appleFileInput', icium: 'iciumFileInput' };
 const UPLOAD_STATUS_IDS = { google: 'googleFileStatus', apple: 'appleFileStatus', icium: 'iciumFileStatus' };

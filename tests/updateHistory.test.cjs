@@ -17,14 +17,12 @@ function createHistoryContext(protocol, fetch) {
     return { context, container, load: () => vm.runInContext('loadUpdateHistory()', context) };
 }
 
-test('업데이트 스크립트가 원본과 같고 두 페이지에서 공용 코드보다 먼저 로드한다', () => {
+test('업데이트 스크립트가 원본과 같고 분석 페이지에서 공용 코드보다 먼저 로드한다', () => {
     const source = fs.readFileSync(path.join(root, 'js/updateHistoryData.js'), 'utf8');
     assert.equal(source, buildUpdateHistorySource());
-    for (const filename of ['index.html', 'recap.html']) {
-        const html = fs.readFileSync(path.join(root, filename), 'utf8');
-        assert.ok(html.indexOf('src="js/updateHistoryData.js"') >= 0);
-        assert.ok(html.indexOf('src="js/updateHistoryData.js"') < html.indexOf('src="js/common.js"'));
-    }
+    const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+    assert.ok(html.indexOf('src="js/updateHistoryData.js"') >= 0);
+    assert.ok(html.indexOf('src="js/updateHistoryData.js"') < html.indexOf('src="js/common.js"'));
 });
 
 test('직접 파일 열기에서는 fetch 없이 실제 최신 공지를 표시한다', async () => {
