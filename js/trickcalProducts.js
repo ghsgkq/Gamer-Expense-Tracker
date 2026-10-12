@@ -117,7 +117,8 @@ const TrickcalProducts = (() => {
         compactIndex = nextCompact;
         aliasIndex = nextAliases;
         icons = new Map(Object.entries(iconMapping)
-            .filter(([, filename]) => typeof filename === 'string' && /^[a-f0-9]{64}\.png$/i.test(filename))
+            // 한글·공백이 있는 로컬 파일명도 허용하되 디렉터리와 제어 문자는 제외합니다.
+            .filter(([, filename]) => typeof filename === 'string' && /^[^/\\\u0000-\u001f\u007f]+\.png$/iu.test(filename))
             .map(([name, filename]) => [normalizeName(name), filename]));
         matchCache.clear();
     }
@@ -232,7 +233,7 @@ const TrickcalProducts = (() => {
         return `<ul class="product-components">${components.map(component => {
             const filename = icons.get(normalizeName(component.name));
             const icon = filename
-                ? `<img class="product-component-image" src="${basePath}component-icons/${filename}" alt="" width="36" height="36" loading="lazy">`
+                ? `<img class="product-component-image" src="${basePath}component-icons/${encodeURIComponent(filename)}" alt="" width="36" height="36" loading="lazy">`
                 : '';
             return `<li class="product-component">
                 <span class="product-component-icon" aria-hidden="true">${icon}<span class="product-icon-fallback${filename ? ' hidden' : ''}">🧩</span></span>

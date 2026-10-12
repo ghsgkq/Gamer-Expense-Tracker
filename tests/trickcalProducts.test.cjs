@@ -241,7 +241,7 @@ test('새 공개 카탈로그의 스텝업 패키지를 판매기간으로 구�
         assert.equal(match.matchedBySalePeriod, true);
         assert.equal(match.candidates[0].saleStart, step['판매 시작일']);
         for (const component of match.candidates[0].components) {
-            if (icons[component.name]) assert.ok(api.render(item).includes(icons[component.name]));
+            if (icons[component.name]) assert.ok(api.render(item).includes(encodeURIComponent(icons[component.name])));
         }
     }
 });
@@ -502,6 +502,25 @@ test('외부 URL이나 경로를 아이콘 주소로 사용하지 않는다', as
     assert.ok(html.includes('product-icon-fallback'));
 });
 
+test('한글·공백·HTML 및 URL 특수 문자가 있는 아이콘 파일명을 안전하게 표시한다', async () => {
+    const filename = '골드 "상자" #1 & 보상?.png';
+    const { api } = createContext([product('패키지', 9900)], { 골드: filename });
+    assert.equal(await api.load(), true);
+    const html = api.render({ title: '패키지', price: 9900, currency: '₩' });
+    assert.ok(html.includes(`component-icons/${encodeURIComponent(filename)}`));
+    assert.ok(!html.includes(filename));
+});
+
+test('상위 디렉터리·역슬래시·제어 문자가 있는 아이콘 파일명은 제외한다', async () => {
+    for (const filename of ['../골드.png', '..\\골드.png', '골드\n.png', '골드\u0000.png']) {
+        const { api } = createContext([product('패키지', 9900)], { 골드: filename });
+        assert.equal(await api.load(), true);
+        const html = api.render({ title: '패키지', price: 9900, currency: '₩' });
+        assert.ok(!html.includes('<img'));
+        assert.ok(html.includes('product-icon-fallback'));
+    }
+});
+
 test('동시 요청을 합치고 실패 후 재시도할 수 있다', async () => {
     let fail = true;
     const { api, requests } = createContext([], {}, async url => {
@@ -528,7 +547,7 @@ test('실제 공개 카탈로그와 모든 아이콘 파일을 읽을 수 있다
         assert.notEqual(api.getMatch({ title: entry.상품명, price: entry.가격, currency: '₩' }).status, 'unmatched');
     }
     for (const filename of Object.values(iconMapping)) {
-        assert.match(filename, /^[a-f0-9]{64}\.png$/i);
+        assert.match(filename, /^[^/\\\u0000-\u001f\u007f]+\.png$/iu);
         assert.ok(fs.existsSync(path.join(root, 'product/trickcal-revive/component-icons', filename)));
     }
 });
